@@ -1,0 +1,35 @@
+---
+import ExperienceItem from "./ExperienceItem.astro";
+const EXPERIENCIE = [
+    {
+        date: "January 2024 - Present",
+        title: "Freelancer at Workana",
+        description:
+            "Responsible for the development of custom software solutions for clients around the world.",
+
+    },
+    {
+        date: "April 2022 - July 2022",
+        title: "Consultant Developer for CryptoMates",
+        description:
+            "Responsible for designing, implementing, and maintaining software solutions, with a focus on tools such as Keycloak, Discourse, and monitoring.",
+    },
+    {
+        date: "February 2022 - April 2022",
+        title: "Discourse Freelancer for Wonderland Engine",
+        link: "/blog/my-first-wonder-job-as-a-freelancer",
+        description:
+            "Responsible for the customization and maintenance of the Discourse forum for Wonderland Engine.",
+    },
+];
+---
+
+<ol class="relative border-s border-gray-200 ml-3">
+    {
+        EXPERIENCIE.map((experiencie) => (
+            <li class="mb-10 ms-4">
+                <ExperienceItem {...experiencie} />
+            </li>
+        ))
+    }
+</ol>

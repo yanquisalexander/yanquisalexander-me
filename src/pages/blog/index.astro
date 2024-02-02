@@ -1,0 +1,73 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection("blog");
+
+---
+
+<Layout title="Blog">
+    <div class="flex justify-center items-center flex-col">
+        <div
+            class="absolute top-0 z-[-2] h-screen w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
+        >
+        </div>
+
+        <header class="page-header">
+            <div
+                class="flex flex-col justify-center items-center h-96 max-w-2xl mx-auto"
+            >
+                <h1 class="text-3xl font-bold text-center text-neutral-100">
+                    Blog
+                </h1>
+                <p class="text-lg text-center text-white/75">
+                    Welcome to my blog! Here you'll find a collection of my
+                    thoughts, ideas, and experiences. I hope you enjoy reading
+                    them as much as I enjoyed writing them.
+                </p>
+            </div>
+        </header>
+
+        <section
+            class="bg-white relative md:w-5/6 px-2 w-full -mt-2 md:mx-auto rounded-3xl mb-8 shadow-lg shadow-black/20 flex flex-col justify-center items-center"
+        >
+            <div class="flex flex-col py-16 px-8 w-3/4">
+                {
+                    allPosts.map((post) => (
+                        <div class="mb-8">
+                            <a class="text-2xl font-bold text-neutral-900" href={`/blog/${post.slug}`}>
+                                {post.data.title}
+                            </a>
+                            <p class="text-neutral-700">
+                                {post.data.description}
+                            </p>
+                            <a
+                                href={`/blog/${post.slug}`}
+                                class="text-primary-500 hover:underline"
+                            >
+                                Read more
+                            </a>
+                            <div class="author flex flex-col my-6 w-full space-x-4 items-end">
+                                <div class="flex flex-row items-center w-full justify-end space-x-4">
+                                    <p class="text-neutral-700 ml-2">
+                                        Posted by {post.data.author.name}
+                                    </p>
+                                    <img
+                                        src={post.data.author.avatar}
+                                        alt="avatar"
+                                        class="w-8 h-8 rounded-full"
+                                    />
+                                </div>
+                                <p class="text-neutral-700">
+                                    {new Date(
+                                        post.data.pubDate,
+                                    ).toLocaleDateString()}
+                                </p>
+                            </div>
+                        </div>
+                    ))
+                }
+            </div>
+        </section>
+    </div>
+</Layout>

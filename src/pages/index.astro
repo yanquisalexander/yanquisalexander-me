@@ -1,0 +1,47 @@
+---
+import AboutMe from "@/components/AboutMe.astro";
+import GlowedBadge from "../components/Badge.astro";
+import Experience from "../components/Experience.astro";
+import HomeHero from "../components/HomeHero.astro";
+import Layout from "../layouts/Layout.astro";
+import ClockUpIcon from "@/icons/ClockUpIcon.astro";
+import UserIcon from "@/icons/UserIcon.astro";
+import ProjectsBento from "@/components/ProjectsBento.astro";
+import SparklesIcon from "@/icons/SparklesIcon.astro";
+import FeaturedButton from "@/components/FeaturedButton.astro";
+import ExternalLinkIcon from "@/icons/ExternalLinkIcon.astro";
+---
+
+<Layout>
+	<HomeHero />
+
+	<section class="max-w-4xl mx-auto px-4 py-8">
+		<h2 class="flex items-center text-2xl font-bold mb-4">
+			<ClockUpIcon class="inline-block w-6 h-6 mr-2" />
+			Experience
+		</h2>
+		<Experience />
+	</section>
+
+	<section class="max-w-4xl mx-auto px-4 py-8">
+		<h2 class="flex items-center text-2xl font-bold mb-4">
+			<SparklesIcon class="inline-block w-6 h-6 mr-2" />
+			Recent Projects
+		</h2>
+		<ProjectsBento />
+		<!-- <div class="text-left">
+			<FeaturedButton href="/projects">
+				<ExternalLinkIcon class="inline-block w-4 h-4 mr-2" />
+				See All Projects
+			</FeaturedButton>
+		</div> -->
+	</section>
+
+	<section class="max-w-4xl mx-auto px-4 py-8">
+		<h2 class="flex items-center text-2xl font-bold mb-4">
+			<UserIcon class="inline-block w-6 h-6 mr-2" />
+			About Me
+		</h2>
+		<AboutMe />
+	</section>
+</Layout>

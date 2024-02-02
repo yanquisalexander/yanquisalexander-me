@@ -1,0 +1,19 @@
+---
+import FeaturedButton from "@/components/FeaturedButton.astro";
+import Layout from "@/layouts/Layout.astro";
+// 404 page
+---
+
+<Layout>
+    <section class="landing h-screen text-white">
+        <div class="absolute top-0 z-[-2] h-full w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+        <div class="flex h-full items-center flex-col justify-center">
+            <h1 class="text-5xl font-bold">404</h1>
+            <p class="text-2xl">Page not found</p>
+            <div class="mt-8">
+                <FeaturedButton href="/">Go back home</FeaturedButton>
+            </div>
+        </div>
+    </section>
+
+</Layout>

@@ -1,0 +1,110 @@
+---
+import Badge from "./Badge.astro";
+import FeaturedButton from "./FeaturedButton.astro";
+import BrandNuxtIcon from "@/icons/BrandNuxtIcon.astro";
+import BrandTwitchIcon from "@/icons/BrandTwitchIcon.astro";
+import ExternalLinkIcon from "@/icons/ExternalLinkIcon.astro";
+
+// Force the inclusion of the classes we need
+const includedClasses = [
+    "grid-cols-1",
+    "grid-cols-2",
+    "grid-cols-3",
+    "grid-cols-4",
+];
+
+interface Project {
+    title: string;
+    image?: string;
+    link?: string;
+    description?: string;
+    colSpan?: number; // Nueva propiedad para el col-span
+    tags?: Tag[];
+}
+
+interface Tag {
+    name: string;
+    classes: string;
+    icon?: any;
+}
+
+const TAGS = {
+    Nuxt: {
+        name: "Nuxt.js",
+        classes: "bg-gradient-to-br from-green-400 to-blue-500 text-white",
+        icon: BrandNuxtIcon,
+    },
+    Express: {
+        name: "Twitch API",
+        classes: "bg-[#9146FF] text-white",
+        icon: BrandTwitchIcon,
+    },
+};
+
+const PROJECTS: Project[] = [
+    {
+        title: "Petruquio.LIVE",
+        image: "https://petruquiolive-next.vercel.app/images/petruquiolive_banner.webp",
+        link: "https://petruquio.live",
+        description: `
+Petruquio.LIVE is an AI-powered chatbot that helps you
+					manage your Twitch channel. It can help you with moderation,
+					channel points, and more!
+                    `,
+        colSpan: 2,
+        tags: [TAGS.Nuxt, TAGS.Express],
+    },
+];
+---
+
+<div
+    class="grid md:auto-rows-[20rem] grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-12"
+>
+    {
+        PROJECTS.map((project, index) => (
+            <div
+                class={`row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input p-4  bg-white border border-transparent justify-between flex flex-col space-y-4 
+                    ${index % 3 === 0 ? "md:col-span-2" : "col-span-1"}`}
+            >
+                <div
+                    class="flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 to-neutral-100"
+                    style={{
+                        backgroundImage: `url(${project.image})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                    }}
+                />
+                <div class="group-hover/bento:translate-x-2 transition duration-200">
+                    <div class="font-sans font-bold text-neutral-600 dark:text-neutral-200 mb-2 mt-2">
+                        {project.title}
+                    </div>
+                    <div class="font-sans font-normal text-neutral-600 text-xs dark:text-neutral-300">
+                        {project.description}
+                    </div>
+                    {project.tags && (
+                        <div class="flex flex-row flex-wrap mt-2 space-x-2">
+                            {project.tags.map((tag, tagIndex) => (
+                                <Badge>
+                                    <tag.icon class="w-4 h-4 mr-2" />
+                                    {tag.name}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
+                    <footer class="flex flex-row justify-between items-center mt-4">
+                        <div class="font-sans font-normal text-neutral-600 text-xs dark:text-neutral-300">
+                            <a
+                                href={project.link}
+                                target="_blank"
+                                class="flex flex-row items-center space-x-1"
+                            >
+                                <ExternalLinkIcon class="w-4 h-4 mr-2" />
+                                {project.link}
+                            </a>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        ))
+    }
+</div>

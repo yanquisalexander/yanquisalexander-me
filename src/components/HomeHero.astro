@@ -1,0 +1,74 @@
+---
+import Badge from "./Badge.astro";
+import SparklesIcon from "@/icons/SparklesIcon.astro";
+import HiglightedText from "./HiglightedText.astro";
+import FeaturedButton from "./FeaturedButton.astro";
+import FilePencilIcon from "@/icons/FilePencilIcon.astro";
+---
+
+<section class="landing h-screen text-white">
+    <div
+        class="absolute top-0 z-[-2] h-full w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
+    >
+    </div>
+    <div
+        class="flex h-full md:max-w-5xl items-center flex-col md:gap-8 justify-center"
+    >
+        <div
+            class="md:text-left text-center flex items-center md:items-start justify-start flex-col"
+        >
+            <div
+                class="flex items-end mb-4 flex-col md:flex-row gap-6 md:gap-0 animate-fade-down animate-delay-[100ms]"
+            >
+                <img
+                    src="/images/alexander.webp"
+                    alt="Alexander Barrios"
+                    class="rounded-full w-16 mx-auto md:ml-0 md:mr-8"
+                />
+                <Badge>
+                    <SparklesIcon class="w-4 h-4 mr-1" />
+                    Available for hire
+                </Badge>
+            </div>
+
+            <h1 class="text-2xl font-medium pt-2 animate-fade-down">
+                <span class="mr-2 w-8 inline-block">
+                    <img
+                        draggable="false"
+                        class="h-8 w-8 animate-wiggle-more animate-infinite animate-delay-[120ms]"
+                        alt="👋"
+                        src="https://cdn.jsdelivr.net/npm/twemoji/2/svg/1f44b.svg"
+                    />
+                </span>
+                Greetings! I'm <HiglightedText>Alexander</HiglightedText>, an
+                Enthusiastic Developer.
+                <h2
+                    class="pt-4 text-lg font-normal max-w-2xl animate-fade-down animate-delay-[120ms] opacity-85"
+                >
+                    Thank you for joining me in this digital adventure. <br />
+                    <span class="inline">
+                        I hope your presence here reflects a shared love for
+                        innovation and exploration. <br />
+                    </span>
+                </h2>
+            </h1>
+            <footer
+                class="flex py-8 flex-col md:flex-row gap-4 animate-fade-down animate-delay-[200ms]"
+            >
+                <FeaturedButton href="https://resume.io/r/5KDzmafS4" target="_blank">
+                    <FilePencilIcon class="w-4 h-4 mr-1" />
+                    Interested in working together?
+                </FeaturedButton>
+
+                <button
+                    class="text-sm font-medium opacity-75 hover:opacity-100"
+                >
+                    <a
+                        onclick="document.getElementById('about-me').scrollIntoView({ behavior: 'smooth' })"
+                        >Learn more about me</a
+                    >
+                </button>
+            </footer>
+        </div>
+    </div>
+</section>

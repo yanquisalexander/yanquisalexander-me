@@ -1,0 +1,57 @@
+---
+import BrandDevToIcon from "@/icons/BrandDevToIcon.astro";
+import BrandGitHubIcon from "@/icons/BrandGitHubIcon.astro";
+import BrandInstagramIcon from "@/icons/BrandInstagramIcon.astro";
+import BrandLinkedInIcon from "@/icons/BrandLinkedInIcon.astro";
+import BrandTwitchIcon from "@/icons/BrandTwitchIcon.astro";
+
+const SOCIAL_NETWORKS = [
+    {
+        name: "Instagram",
+        url: "https://www.instagram.com/alexitoo_uy/",
+        icon: BrandInstagramIcon,
+    },
+    {
+        name: "DEV.to",
+        url: "https://dev.to/alexitoo_uy",
+        icon: BrandDevToIcon,
+    },
+    {
+        name: "GitHub",
+        url: "https://github.com/yanquisalexander",
+        icon: BrandGitHubIcon,
+    },
+    {
+        name: "LinkedIn",
+        url: "https://www.linkedin.com/in/yanquisalexander/",
+        icon: BrandLinkedInIcon,
+    },
+    {
+        name: "Twitch",
+        url: "https://www.twitch.tv/alexitoo_uy",
+        icon: BrandTwitchIcon,
+    }
+];
+---
+
+<footer class="flex flex-col py-4 bg-zinc-900 justify-center items-center">
+    <div class="flex justify-center items-center space-x-6 my-4">
+        {
+            SOCIAL_NETWORKS.map((s) => (
+                <>
+                    <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-white hover:text-blue-300 transition-colors duration-300"
+                    >
+                        <s.icon class="w-6 h-6" />
+                    </a>
+                </>
+            ))
+        }
+    </div>
+    <span class="text-white text-sm">
+        &copy; {new Date().getFullYear()} - Alexander Barrios
+    </span>
+</footer>

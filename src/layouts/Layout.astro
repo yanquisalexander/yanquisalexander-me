@@ -1,0 +1,53 @@
+---
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import { ViewTransitions } from "astro:transitions";
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+const pageTitle = (title: string | null) =>
+	title ? `${title} | Alexander Barrios` : "Alexander Barrios";
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Outfit:wght@100..900&display=swap"
+			rel="stylesheet"
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<ViewTransitions />
+		<title>{title ? pageTitle(title) : pageTitle(null)}</title>
+		{description ? <meta name="description" content={description} /> : null}
+	</head>
+	<body>
+		<div class="absolute top-0 -z-10 h-full w-full bg-white">
+			<div
+				class="absolute bottom-auto left-auto right-0 top-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-[rgba(173,109,244,0.5)] opacity-50 blur-[80px]"
+			>
+			</div>
+		</div>
+		<SiteHeader />
+		<main>
+			<slot />
+		</main>
+		<SiteFooter />
+		<style is:global>
+			html {
+				font-family: "Lato", sans-serif !important;
+			}
+		</style>
+	</body>
+</html>
