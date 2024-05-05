@@ -1,51 +1,67 @@
 ---
 import SiteFooter from "@/components/SiteFooter.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
+import Seo from "@/components/Seo.astro";
 import { ViewTransitions } from "astro:transitions";
+import type { Preload } from "@/types/Preload";
+import ButtonUp from "@/components/ButtonUp.astro";
 
 interface Props {
 	title?: string;
 	description?: string;
+	preload?: Array<Preload>;
+	canonical?: string;
+	image?: string;
 }
 
-const { title, description } = Astro.props;
-const pageTitle = (title: string | null) =>
-	title ? `${title} | Alexander Barrios` : "Alexander Barrios";
+const { title, description, preload, canonical, image } = Astro.props;
+
+const normalizedTitle = title
+	? `${title} | Alexander Barrios`
+	: "Alexander Barrios";
 ---
 
 <!doctype html>
 <html lang="en" class="scroll-smooth">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="sitemap" href="/sitemap-index.xml" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-		<meta name="generator" content={Astro.generator} />
+		<Seo
+			canonical={canonical}
+			description={description}
+			image={image}
+			preload={preload}
+			title={normalizedTitle}
+		/>
 		<ViewTransitions />
-		<title>{title ? pageTitle(title) : pageTitle(null)}</title>
-		{description ? <meta name="description" content={description} /> : null}
 	</head>
-	<body>
-		<div class="absolute top-0 -z-10 h-full w-full bg-white">
+	<body class="text-white">
+		<div class="fixed bg-purple-700 left-0 top-0 -z-10 h-full w-full">
 			<div
-				class="absolute bottom-auto left-auto right-0 top-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-[rgba(173,109,244,0.5)] opacity-50 blur-[80px]"
+				class="absolute top-0 z-[-2] min-h-full w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
 			>
 			</div>
 		</div>
 		<SiteHeader />
-		<main>
+		<main class="px-6 sm:px-10 md:px-24">
 			<slot />
 		</main>
 		<SiteFooter />
+		<ButtonUp />
 		<style is:global>
+			:root {
+				--color-primary: #ddd;
+				--color-secondary: #333;
+				--color-accent: #9146ff;
+				--color-accent-rgb: 213, 255, 0;
+
+				--background-color: #141800;
+				--background-twitch: var(--color-twitch-ice);
+
+				--color-twitch: #9146ff;
+				--color-twitch-ice: #f0f0ff;
+			}
 			html {
-				font-family: "Rubik", sans-serif !important;
+				font-family: "Jost", sans-serif !important;
 			}
 		</style>
 	</body>

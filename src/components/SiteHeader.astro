@@ -1,14 +1,22 @@
 ---
 const links = [
-    /*     {
+    {
         label: "Services",
         url: "/services",
-    }, */
+    },
+    {
+        label: "Guest Book",
+        url: "/guestbook",
+    },
     {
         label: "Blog",
         url: "/blog",
     },
 ];
+
+const activeClasses = ["!text-black", "bg-white", "hover:bg-opacity-10"];
+
+const currentPath = Astro.url.pathname;
 ---
 
 <header
@@ -16,6 +24,7 @@ const links = [
 >
     <div class="flex items-center">
         <a
+            id="home-button"
             href="/"
             class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center"
         >
@@ -30,13 +39,23 @@ const links = [
     <div class="flex-1"></div>
 
     <nav class="flex items-center space-x-5">
-        <ul class="flex items-center space-x-5">
+        <ul class="flex items-center space-x-2">
             {
                 links.map((link) => (
                     <li>
                         <a
                             href={link.url}
-                            class="text-white transition-all duration-300 py-2 px-3 rounded-md hover:bg-white hover:bg-opacity-10"
+                            class:list={[
+                                "text-white",
+                                "transition-all",
+                                "duration-300",
+                                "py-2",
+                                "px-3",
+                                "rounded-md",
+                                "hover:bg-white",
+                                "hover:bg-opacity-10",
+                                currentPath === link.url ? activeClasses : null,
+                            ]}
                         >
                             {link.label}
                         </a>
@@ -46,3 +65,21 @@ const links = [
         </ul>
     </nav>
 </header>
+
+<script>
+    import { $ } from "@/lib/dom-selector";
+    document.addEventListener("astro:page-load", () => {
+        const $homeButton = $("#home-button");
+        if ($homeButton) {
+            $homeButton.addEventListener("click", (event) => {
+                if (location.pathname === "/") {
+                    event.preventDefault();
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                    });
+                }
+            });
+        }
+    });
+</script>

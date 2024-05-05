@@ -1,0 +1,55 @@
+---
+import GuestLogin from "@/components/GuestBook/GuestLogin.astro";
+import Layout from "@/layouts/Layout.astro";
+import { getSession } from "auth-astro/server";
+
+const session = await getSession(Astro.request);
+---
+
+<Layout title="Guest Book">
+    <div class="flex items-center flex-col min-h-screen pt-28">
+        <h1 class="text-3xl font-bold">Guest Book</h1>
+        <p class="text-gray-500">Leave a message or review for the website</p>
+        <div class="mt-4">
+            {
+                !session ? (
+                    <GuestLogin />
+                ) : (
+                    <div class="flex items-center justify-center gap-4 mt-8">
+                        <img
+                            class="size-12 rounded-full"
+                            src={session.user.image}
+                            alt={`Avatar del usuario ${session.user.name}`}
+                        />
+                        <div class="flex flex-col justify-center">
+                            <h4 class="text-lg font-bold">
+                                {session.user.name}
+                            </h4>
+                            <button
+                                id="logout"
+                                class="text-sm font-light text-purple-300"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</Layout>
+
+<script>
+    import { signOut } from "auth-astro/client";
+    import { $ } from "@/lib/dom-selector";
+
+    document.addEventListener("astro:page-load", () => {
+        const logoutButton = $("#logout");
+        if (logoutButton) {
+            logoutButton.addEventListener("click", async () => {
+                await signOut();
+                location.reload();
+            });
+        }
+    });
+</script>

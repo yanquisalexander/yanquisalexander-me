@@ -8,10 +8,6 @@ import FilePencilIcon from "@/icons/FilePencilIcon.astro";
 
 <section class="landing h-screen text-white">
     <div
-        class="absolute top-0 z-[-2] h-full w-full bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"
-    >
-    </div>
-    <div
         class="flex h-full md:max-w-5xl items-center flex-col md:gap-8 justify-center"
     >
         <div
@@ -55,16 +51,21 @@ import FilePencilIcon from "@/icons/FilePencilIcon.astro";
             <footer
                 class="flex py-8 flex-col md:flex-row gap-4 animate-fade-down animate-delay-[200ms]"
             >
-                <FeaturedButton href="https://resume.io/r/5KDzmafS4" target="_blank" title="Interested in working together?">
+                <FeaturedButton
+                    href="https://resume.io/r/5KDzmafS4"
+                    target="_blank"
+                    title="Interested in working together?"
+                >
                     <FilePencilIcon class="w-4 h-4 mr-1" />
                     Interested in working together?
                 </FeaturedButton>
 
-               
-                    <button class="text-sm font-medium opacity-75 hover:opacity-100 py-4 md:py-0" title="Learn more about me"
-                        onclick="document.getElementById('about-me').scrollIntoView({ behavior: 'smooth' })"
-                        >Learn more about me</button
-                    >
+                <button
+                    class="text-sm font-medium opacity-75 hover:opacity-100 py-4 md:py-0"
+                    title="Learn more about me"
+                    onclick="document.getElementById('about-me').scrollIntoView({ behavior: 'smooth' })"
+                    >Learn more about me</button
+                >
             </footer>
         </div>
     </div>

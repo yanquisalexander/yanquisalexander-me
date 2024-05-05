@@ -1,0 +1,32 @@
+---
+interface Props {
+    username: string;
+    avatar: string;
+    message: string;
+    date: Date;
+    calification?: number;
+}
+
+const { username, avatar, message, date, calification } = Astro.props;
+---
+
+<article class="border-2 border-gray-200 rounded-lg p-4 flex space-x-4">
+    <img src={avatar} alt="avatar" class="w-12 h-12 rounded-full" />
+    <div class="flex-1">
+        <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">{username}</h2>
+            <time datetime={date.toISOString()}
+                >{date.toLocaleDateString()}</time
+            >
+        </header>
+        <p class="text-gray-600">{message}</p>
+        {
+            calification && (
+                <div class="flex items-center space-x-2">
+                    <span class="text-yellow-500">★</span>
+                    <span>{calification}</span>
+                </div>
+            )
+        }
+    </div>
+</article>

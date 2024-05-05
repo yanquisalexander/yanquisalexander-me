@@ -20,14 +20,15 @@ const pageTitle = (title: string | null) =>
 	title ? `${title} | Alexander Barrios` : "Alexander Barrios";
 
 const calculateReadingTime = (content: string) => {
-	const wordsPerMinute = 200;
+	const averageWordsPerMinute = 200;
 	const text = content.trim().replace(/<[^>]+>/g, "");
 	const wordCount = text.split(/\s+/).length;
-	const readingTime = Math.ceil(wordCount / wordsPerMinute);
+	const readingTime = Math.ceil(wordCount / averageWordsPerMinute);
 	return readingTime;
 };
 
 const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
+
 ---
 
 <!doctype html>
@@ -164,7 +165,7 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 		<SiteFooter />
 		<style is:global>
 			html {
-				font-family: "Rubik", sans-serif !important;
+				font-family: "Jost", sans-serif !important;
 			}
 		</style>
 	</body>

@@ -1,0 +1,29 @@
+---
+interface Props {
+    id: string;
+    title: string;
+    description?: string;
+}
+
+const { id, title } = Astro.props;
+---
+
+<section
+    id={id}
+    class="w-full md:max-w-5xl mx-auto scroll-mt-6 animate-fade-in-left animate-delay-100 pb-28"
+>
+    <h2
+        class="text-slate-100 text-2xl 2xl:text-3xl font-semibold mb-6 flex gap-x-3 items-center animate-fade-in-right"
+    >
+        <slot name="icon" />
+        {title}
+    </h2>
+    {
+        Astro.props.description && (
+            <span class="text-slate-300 text-base 2xl:text-lg font-normal">
+                {Astro.props.description}
+            </span>
+        )
+    }
+    <slot />
+</section>

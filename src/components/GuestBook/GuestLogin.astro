@@ -1,0 +1,61 @@
+---
+import Typography from "@/components/Typography.astro";
+import Action from "@/components/Action.astro";
+---
+
+<section class="relative flex min-h-96 flex-row justify-between lg:min-h-min">
+    <div class="flex max-w-lg flex-col items-center justify-center px-10">
+        <Typography
+            class="mb-10 text-wrap text-center"
+            color="primary"
+            as="h1"
+            variant={"h3"}
+        >
+            ¡Leave your mark 🐾!
+        </Typography>
+        <Typography as="p" color="white" variant="body" class="mb-10">
+            Would you like to leave a nice message or review on the wall? You
+            can do it here.
+        </Typography>
+        <Action
+            id="login"
+            class="w-full text-sm md:text-base"
+            aria-label="Login with GitHub"
+            as="button"
+        >
+            Login with GitHub
+        </Action>
+        <small class="mt-2"> To write a note, you need a GitHub account </small>
+    </div>
+    <aside class="absolute -z-10 opacity-20 lg:relative lg:opacity-100">
+        <img
+            alt="Feedback image"
+            src="/images/feedback.png"
+            style="mask-image: linear-gradient(black 80%, transparent);"
+        />
+    </aside>
+</section>
+
+<script>
+    import { $ } from "@/lib/dom-selector";
+
+    const { signIn } = await import("auth-astro/client");
+    document.addEventListener("astro:page-load", () => {
+        const $login = $("#login");
+
+        if ($login) {
+            $login.onclick = () => {
+                signIn("github");
+                $login.setAttribute("aria-disabled", "true");
+                const $span = $login.querySelector("span");
+
+                if ($span) $span.innerText = "Loading...";
+                // Añade un temporizador que restablezca el botón después de 3 segundos
+                setTimeout(() => {
+                    $login.removeAttribute("aria-disabled");
+                    if ($span) $span.innerText = "Login with GitHub";
+                }, 3000);
+            };
+        }
+    });
+</script>
