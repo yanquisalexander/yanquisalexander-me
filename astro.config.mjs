@@ -11,5 +11,9 @@ export default defineConfig({
   site: "https://www.yanquisalexander.me",
   integrations: [tailwind(), sitemap(), auth(), db()],
   output: "server",
-  adapter: vercel()
+  adapter: vercel({
+    webAnalytics: {
+      enabled: true
+    }
+  })
 });
