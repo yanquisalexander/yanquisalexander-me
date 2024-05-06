@@ -5,7 +5,7 @@ const posts = await getCollection("blog");
 const entry = posts.find((post) => post.slug === Astro.params.slug);
 
 if (!entry) {
-    return { status: 404 };
+    return new Response("Not found", { status: 404 });
 }
 
 const { Content } = await entry.render();
