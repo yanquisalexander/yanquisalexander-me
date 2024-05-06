@@ -1,20 +1,25 @@
 ---
 import BlogShareButtons from "@/components/BlogShareButtons.astro";
 import FeaturedButton from "@/components/FeaturedButton.astro";
+import Seo from "@/components/Seo.astro";
 import SiteFooter from "@/components/SiteFooter.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
 import ClockUpIcon from "@/icons/ClockUpIcon.astro";
+import type { Preload } from "@/types/Preload";
 import type { MarkdownInstance } from "astro";
 import { ViewTransitions } from "astro:transitions";
+
 
 interface Props {
 	title?: string;
 	description?: string;
-	content?: any
+	preload?: Array<Preload>;
+	canonical?: string;
+	image?: string;
+	content: any
 }
 
-const { title, description, content } = Astro.props;
-
+const { title, description, preload, canonical, image, content } = Astro.props;
 
 const pageTitle = (title: string | null) =>
 	title ? `${title} | Alexander Barrios` : "Alexander Barrios";
@@ -35,16 +40,18 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 <html lang="en" class="scroll-smooth">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="sitemap" href="/sitemap-index.xml" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
-		<meta name="generator" content={Astro.generator} />
+		<Seo
+			canonical={canonical}
+			description={description}
+			image={image}
+			preload={preload}
+			title={
+				title
+					? pageTitle(title)
+					: pageTitle(null)
+			}
+		/>
+		<ViewTransitions />
 		{
 			content && <script type="application/ld+json">
 {
