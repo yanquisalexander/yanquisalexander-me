@@ -4,10 +4,25 @@ import { GuestBook, Users } from "astro:db";
 import { db } from "astro:db";
 import Message from "./Message.astro";
 
-const reviews = await db
-    .select()
-    .from(GuestBook)
-    .innerJoin(Users, eq(GuestBook.userId, Users.id));
+interface Props {
+    reviews: {
+        GuestBook: {
+            id: number;
+            message: string;
+            userId: string;
+            calification?: number | null;
+            createdAt: Date;
+            updatedAt?: Date;
+        };
+        Users: {
+            id: string;
+            username: string;
+            avatar: string;
+        };
+    }[];
+}
+
+const { reviews } = Astro.props;
 ---
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">

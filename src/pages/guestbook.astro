@@ -2,12 +2,53 @@
 import GuestLogin from "@/components/GuestBook/GuestLogin.astro";
 import ReviewGrids from "@/components/GuestBook/ReviewGrids.astro";
 import Layout from "@/layouts/Layout.astro";
+import { GuestBook, Users, db, eq } from "astro:db";
 import { getSession } from "auth-astro/server";
 
 const session = await getSession(Astro.request);
+
+const reviews = await db
+    .select()
+    .from(GuestBook)
+    .innerJoin(Users, eq(GuestBook.userId, Users.id));
+
+const reviewsJsonLD = reviews.map(({ Users, GuestBook }) => ({
+    "@type": "Review",
+    author: {
+        "@type": "Person",
+        name: Users.username,
+    },
+    reviewRating: {
+        "@type": "Rating",
+        ratingValue: GuestBook.calification ?? 5,
+    },
+    datePublished: GuestBook.createdAt,
+}));
+
+const jsonSchemaOrgWithReviews = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Alexander's Guest Book",
+    description: "Leave a message or review for the website",
+    url: "https://www.yanquisalexander.com/guestbook",
+    inLanguage: "en-US",
+    author: {
+        "@type": "Person",
+        name: "Alexander Barrios",
+    },
+    publisher: {
+        "@type": "Organization",
+        name: "Alexander Barrios",
+    },
+    review: reviewsJsonLD,
+};
 ---
 
 <Layout title="Guest Book">
+    <script
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonSchemaOrgWithReviews)}
+    />
     <div class="flex items-center flex-col min-h-screen pt-28">
         <h1 class="text-3xl font-bold">Guest Book</h1>
         <p class="text-gray-500">Leave a message or review for the website</p>
@@ -38,7 +79,7 @@ const session = await getSession(Astro.request);
             }
         </div>
 
-        <ReviewGrids />
+        <ReviewGrids reviews={reviews} />
     </div>
 </Layout>
 
