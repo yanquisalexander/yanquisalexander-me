@@ -9,14 +9,13 @@ import type { Preload } from "@/types/Preload";
 import type { MarkdownInstance } from "astro";
 import { ViewTransitions } from "astro:transitions";
 
-
 interface Props {
 	title?: string;
 	description?: string;
 	preload?: Array<Preload>;
 	canonical?: string;
 	image?: string;
-	content: any
+	content: any;
 }
 
 const { title, description, preload, canonical, image, content } = Astro.props;
@@ -34,6 +33,26 @@ const calculateReadingTime = (content: string) => {
 
 const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 
+const schema = {
+	"@context": "https://schema.org",
+	"@type": "BlogPosting",
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": `https://www.yanquisalexander.me/blog/${content.slug}`,
+	},
+	headline: `${content.data.title}`,
+	description: `${content.data.description}`,
+	author: {
+		"@type": "Person",
+		name: "Alexander Barrios",
+	},
+	publisher: {
+		"@type": "Organization",
+		name: "Alexander Barrios",
+	},
+	datePublished: `${content.pubDate}`,
+	dateModified: `${content.pubDate}`,
+};
 ---
 
 <!doctype html>
@@ -45,46 +64,26 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 			description={description}
 			image={image}
 			preload={preload}
-			title={
-				title
-					? pageTitle(title)
-					: pageTitle(null)
-			}
+			title={title ? pageTitle(title) : pageTitle(null)}
 		/>
 		<ViewTransitions />
 		{
-			content && <script type="application/ld+json">
-{
-"@context": "https://schema.org",
-"@type": "BlogPosting",
-"mainEntityOfPage": {
-"@type": "WebPage",
-"@id": `https://www.yanquisalexander.me/blog/${content.slug}`
-},
-"headline": `${content.data.title}`,
-"description": `${content.data.description}`,
-"author": {
-"@type": "Person",
-"name": "Alexander Barrios"
-},
-"publisher": {
-"@type": "Organization",
-"name": "Alexander Barrios"
-},
-"datePublished": `${content.pubDate}`,
-"dateModified": `${content.pubDate}`
-}
-</script>
+			content && (
+				<script
+					type="application/ld+json"
+					set:html={JSON.stringify(schema)}
+				/>
+			)
 		}
 		<ViewTransitions />
 		<title>
-			{
-				title
-					? pageTitle(title)
-					: pageTitle(null)
-			}
+			{title ? pageTitle(title) : pageTitle(null)}
 		</title>
-		{content.data.description ? <meta name="description" content={content.data.description} /> : null}
+		{
+			content.data.description ? (
+				<meta name="description" content={content.data.description} />
+			) : null
+		}
 	</head>
 	<body>
 		<SiteHeader />
@@ -118,19 +117,21 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 				<article class="max-w-2xl mx-auto">
 					{
 						content.data.author && (
-							<p class="text-gray-600 mb-4">
-								<img
-									src={content.data.author.avatar}
-									alt={content.data.author.name}
-									title={content.data.author.name}
-									class="w-8 h-8 rounded-full inline-block mr-2"
-								/>
-								Published by {content.data.author.name}
-							</p>
-							<p class="text-gray-600 mb-4 flex items-center">
-								<ClockUpIcon class="w-4 h-4 inline-block mr-2" />
-								Reading time: {readingTime} min
-							</p>
+							<>
+								<p class="text-gray-600 mb-4">
+									<img
+										src={content.data.author.avatar}
+										alt={content.data.author.name}
+										title={content.data.author.name}
+										class="w-8 h-8 rounded-full inline-block mr-2"
+									/>
+									Published by {content.data.author.name}
+								</p>
+								<p class="text-gray-600 mb-4 flex items-center">
+									<ClockUpIcon class="w-4 h-4 inline-block mr-2" />
+									Reading time: {readingTime} min
+								</p>
+							</>
 						)
 					}
 					<h1 class="text-xl font-bold mb-4">
@@ -139,18 +140,18 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 					{
 						content?.pubDate && (
 							<p class="text-gray-600 mb-8">
-								{new Date(
-									content?.pubDate,
-								).toLocaleDateString("en-US", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
+								{new Date(content?.pubDate).toLocaleDateString(
+									"en-US",
+									{
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									},
+								)}
 							</p>
 						)
 					}
 
-					
 					{
 						content?.description && (
 							<p class="leading-relaxed mb-8 text-black/60 italic text-sm">
@@ -158,8 +159,6 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 							</p>
 						)
 					}
-
-					
 
 					<div
 						class="[&>p]:text-lg [&>p]:leading-relaxed [&>p]:mb-4 [&>p>em]:text-black/50 [&>p>em]:text-sm [&>p>em]:font-bold [&>p>strong]:font-bold [&>p>a]:text-blue-500 [&>p>a]:hover:text-blue-700 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-500 [&>blockquote]:pl-4 [&>blockquote]:my-8 [&>ul]:list-disc [&>ul>li]:ml-4 [&>ol]:list-decimal [&>ol>li]:ml-4 [&>blockquote>p]:italic [&>blockquote>p]:text-gray-600 [&>blockquote>p]:mb-4"
