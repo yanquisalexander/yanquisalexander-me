@@ -36,6 +36,7 @@ const readingTime = content?.body ? calculateReadingTime(content.body) : 0;
 const schema = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
+	url: `https://www.yanquisalexander.me/blog/${content.slug}`,
 	mainEntityOfPage: {
 		"@type": "WebPage",
 		"@id": `https://www.yanquisalexander.me/blog/${content.slug}`,
@@ -50,8 +51,8 @@ const schema = {
 		"@type": "Organization",
 		name: "Alexander Barrios",
 	},
-	datePublished: `${content.pubDate}`,
-	dateModified: `${content.pubDate}`,
+	datePublished: `${content.data.pubDate}`,
+	dateModified: `${content.data.pubDate}`,
 };
 ---
 
