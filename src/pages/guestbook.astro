@@ -1,5 +1,6 @@
 ---
 import GuestLogin from "@/components/GuestBook/GuestLogin.astro";
+import ReviewGrids from "@/components/GuestBook/ReviewGrids.astro";
 import Layout from "@/layouts/Layout.astro";
 import { getSession } from "auth-astro/server";
 
@@ -36,6 +37,8 @@ const session = await getSession(Astro.request);
                 )
             }
         </div>
+
+        <ReviewGrids />
     </div>
 </Layout>
 

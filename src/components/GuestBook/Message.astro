@@ -1,0 +1,63 @@
+---
+import StarIcon from "@/icons/StarIcon.astro";
+
+interface Props {
+    username: string;
+    avatar: string;
+    message: string;
+    calification?: number | null;
+}
+
+const { username, avatar, message, calification } = Astro.props;
+---
+
+<li class="text-sm leading-6 list-none">
+    <div
+        class="relative overflow-hidden rounded-xl border border-gray-800 p-[1px] backdrop-blur-3xl"
+    >
+        <span
+            class="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]"
+        ></span>
+        <div
+            class="inline-flex h-full w-full items-center justify-center rounded-xl bg-zinc-950/95 px-3 py-1 text-sm font-medium text-gray-50 backdrop-blur-3xl hover:bg-zinc-950/100 transition-colors duration-200"
+        >
+            <div class="relative p-6 space-y-6 leading-none rounded-lg">
+                <div class="flex items-center space-x-4">
+                    <img
+                        src={avatar}
+                        class="w-10 h-10 bg-center bg-cover border rounded-full"
+                        alt={username}
+                    />
+                    <div>
+                        <h3 class="text-md font-semibold text-white">
+                            {username}
+                        </h3>
+                        {
+                            calification && (
+                                <div class="flex items-center space-x-2 mt-2">
+                                    {Array.from({ length: 5 }).map(
+                                        (_, index) => (
+                                            <StarIcon
+                                                class={`w-4 h-4 ${
+                                                    index < calification
+                                                        ? "text-yellow-400"
+                                                        : "text-gray-300"
+                                                }`}
+                                            />
+                                        ),
+                                    )}
+                                    <span class="text-gray-300">
+                                        {calification}
+                                    </span>
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+                <p class="leading-normal text-gray-300 text-md">
+                    {message}
+                </p>
+            </div>
+        </div>
+    </div>
+</li>
