@@ -22,7 +22,13 @@ const GuestBook = {
     calification: column.number({
       optional: true
     })
-  }
+  },
+  indexes: [
+    {
+      on: ['userId'], unique: true
+    }
+  ]
+
 }
 
 // https://astro.build/db/config
