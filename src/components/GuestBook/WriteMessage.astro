@@ -1,0 +1,256 @@
+---
+import StarIcon from "@/icons/StarIcon.astro";
+import Modal from "../Modal.astro";
+import Twemoji from "../Twemoji.astro";
+
+interface Props {
+    review?: any;
+}
+
+const { review } = Astro.props;
+---
+
+{
+    review ? (
+        <div id="current-review-data" data-review={JSON.stringify(review)}></div>
+        <div class="flex flex-col items-center justify-center">
+            <h2 class="text-2xl font-bold text-center">
+                Look's like you already reviewed this page
+            </h2>
+            <p class="text-center">
+                You can edit your review by clicking the button below
+            </p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 edit-review">
+                Edit Review
+            </button>
+
+            <Modal buttonSelector=".edit-review"> 
+                <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
+                    <h2 class="text-lg font-medium text-center">
+                        Edit your review <Twemoji emoji="📝" />
+                    </h2>
+                    <p class="text-center text-sm">
+                        You can edit your review here
+                    </p>
+
+                    <form class="w-full mt-4">
+                        <label
+                            for="review"
+                            class="block text-sm font-medium text-white"
+                        >
+                            Review
+                        </label>
+                        <textarea
+                            id="review"
+                            name="review"
+                            rows="3"
+                            class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        >
+                            {review.message}
+                        </textarea>
+
+                        <div class="flex flex-col items-center mt-4">
+                            <div id="stars" class="flex mt-2"></div>
+
+                            <label
+                                for="rating"
+                                class="block text-sm font-medium text-white mt-4"
+                            >
+                                Rating
+                            </label>
+                            <input
+                                type="range"
+                                id="rating"
+                                name="rating"
+                                value={review.calification}
+                                min="1"
+                                max="5"
+                                class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg submit-review"
+                        >
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+             </Modal>
+        </div>
+    ) : (
+        <div class="flex flex-col items-center justify-center">
+            <h2 class="text-2xl font-bold text-center">
+                Leave a review for this page
+            </h2>
+            <p class="text-center">
+                Let us know what you think about this page
+            </p>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 leave-review">
+                Leave Review
+            </button>
+
+            <Modal buttonSelector=".leave-review">
+                <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
+                    <h2 class="text-lg font-medium text-center">
+                        Leave a review for this page <Twemoji emoji="✨" />
+                    </h2>
+                    <p class="text-center text-sm">
+                        Hope you enjoyed your time here, let me know what you
+                        think
+                    </p>
+
+                    <form class="w-full mt-4">
+                        <label
+                            for="review"
+                            class="block text-sm font-medium text-white"
+                        >
+                            Review
+                        </label>
+                        <textarea
+                            id="review"
+                            name="review"
+                            rows="3"
+                            class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        />
+
+                        <div class="flex flex-col items-center mt-4">
+                           
+                            <div id="stars" class="flex mt-2"></div>
+
+                            <label
+                                for="rating"
+                                class="block text-sm font-medium text-white mt-4"
+                            >
+                                Rating
+                            </label>
+                            <input
+                                type="range"
+                                id="rating"
+                                name="rating"
+                                value="3"
+                                min="1"
+                                max="5"
+                                class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg submit-review"
+                        >
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+            </Modal>
+        </div>
+    )
+}
+
+<template id="star-icon">
+    {/** SVG */}
+    <StarIcon />
+</template>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+    import { $ } from "@/lib/dom-selector";
+
+
+    let calification = 3;
+
+    const sendReview = async (review: string, rating: number) => {
+        try {
+            const response = await fetch("/api/guest-book/comments.json", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    message: review,
+                    calification
+                }),
+            });
+
+            if (response.ok) {
+                console.log("Review sent");
+                navigate(location.pathname);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleRatingChange = (rating: number) => {
+        calification = rating;
+        const stars = $("#stars") as HTMLElement;
+
+        stars.innerHTML = "";
+
+        for (let i = 0; i < 5; i++) {
+            const star = document.getElementById("star-icon")?.content.cloneNode(
+                true
+            ) as HTMLElement;
+
+            const starIcon = star.querySelector("svg");
+
+            if(!starIcon) return;
+
+            if (i < calification) {
+                starIcon.classList.add("text-yellow-400");
+            } else {
+                starIcon.classList.add("text-gray-300");
+            }
+
+            stars.appendChild(star);
+        }
+    };
+
+    document.addEventListener("astro:page-load", () => {
+        const rating = $("#rating") as HTMLInputElement;
+        const $submitReview = $(".submit-review") as HTMLButtonElement;
+
+        const currentReviewData = $("#current-review-data") as HTMLElement;
+
+        if (currentReviewData && currentReviewData.dataset.review) {
+            const reviewData = JSON.parse(currentReviewData.dataset.review);
+
+            if (reviewData) {
+                const review = $("#review") as HTMLTextAreaElement;
+
+                if (!review) return;
+
+                review.value = reviewData.GuestBook.message;
+                calification = reviewData.GuestBook.calification;
+                rating.value = calification.toString();
+                handleRatingChange(calification);
+            }
+        }
+
+        if (!$submitReview) return;
+
+        $submitReview.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            const review = $("#review") as HTMLTextAreaElement;
+
+            if (!review) return;
+
+            sendReview(review.value, calification);
+        });
+
+        if (!rating) return;
+
+        rating.addEventListener("input", () => {
+            console.log(rating.value);
+            calification = parseInt(rating.value);
+            handleRatingChange(calification);
+        });
+
+        handleRatingChange(calification);
+    });
+
+
+</script>

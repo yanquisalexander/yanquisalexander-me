@@ -1,0 +1,101 @@
+---
+interface Props {
+    buttonSelector: string;
+}
+
+const { buttonSelector } = Astro.props;
+---
+
+<dialog
+    data-button-selector={buttonSelector}
+    class="dialog items-center justify-center px-4 text-2xl text-white sm:px-0 bg-transparent"
+>
+    <div class="relative block w-[80vw] max-w-[1000px] bg-transparent">
+        <button
+            type="button"
+            class="close-dialog fixed right-8 top-8 rounded bg-white/40 p-4 transition hover:scale-110 hover:bg-accent hover:text-black"
+        >
+            <span class="sr-only">Close dialog</span>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <slot />
+    </div>
+</dialog>
+
+<style>
+    .dialog[open]::backdrop {
+        background-color: rgba(0, 0, 0, 0.7);
+
+        animation-name: join-anim;
+        animation-duration: 200ms;
+        animation-fill-mode: forwards;
+        animation-timing-function: ease-in-out;
+    }
+
+    @keyframes join-anim {
+        from {
+            background-color: rgba(0, 0, 0, 0);
+        }
+        to {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+    }
+</style>
+
+<script>
+    import { $, $$ } from "@/lib/dom-selector";
+
+    document.addEventListener("astro:page-load", () => {
+        const $dialogs = $$(".dialog");
+
+        let count = 0;
+
+        // @ts-ignore
+        $dialogs.forEach(($dialog: HTMLDialogElement) => {
+            const buttonSelector = $dialog.dataset.buttonSelector;
+            if (!buttonSelector) return;
+
+            // Assign an incremental id to each dialog
+            $dialog.id = `dialog-${count}`;
+
+            count += 1;
+            const $trigger = $(buttonSelector);
+            if (!$trigger) return;
+
+            $trigger.addEventListener("click", () => {
+                $dialog.showModal();
+            });
+
+            $dialog.addEventListener("click", (e) => {
+                if (e.target === $dialog) {
+                    $dialog.close();
+                }
+            });
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    $dialog.close();
+                }
+            });
+
+            const $closeButton = $dialog.querySelector(".close-dialog");
+            if (!$closeButton) return;
+            $closeButton.addEventListener("click", () => {
+                $dialog.close();
+            });
+        });
+    });
+</script>

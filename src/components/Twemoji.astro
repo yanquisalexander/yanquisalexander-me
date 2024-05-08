@@ -1,0 +1,30 @@
+---
+import { parse } from "@twemoji/parser";
+
+interface Props {
+    emoji: string;
+    size?: number;
+}
+
+const { emoji } = Astro.props;
+
+const size = Astro.props.size || 16;
+
+const parsedEmojis = parse(emoji);
+---
+
+{
+    parsedEmojis.map((parsedEmoji) => {
+        return (
+            <img
+                class="inline-block"
+                draggable="false"
+                {...Astro.props}
+                src={parsedEmoji.url}
+                alt={parsedEmoji.text}
+                width={size}
+                height={size}
+            />
+        );
+    })
+}
