@@ -25,7 +25,7 @@ interface Props {
 const { reviews } = Astro.props;
 ---
 
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8 mb-8">
     {
         reviews.map(({ GuestBook, Users }) => (
             <Message

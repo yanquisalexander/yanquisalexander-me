@@ -2,6 +2,8 @@
 import StarIcon from "@/icons/StarIcon.astro";
 import Modal from "../Modal.astro";
 import Twemoji from "../Twemoji.astro";
+import Typography from "../Typography.astro";
+import PenLineIcon from "@/icons/PenLineIcon.astro";
 
 interface Props {
     review?: any;
@@ -10,156 +12,212 @@ interface Props {
 const { review } = Astro.props;
 ---
 
-{
-    review ? (
-        <div id="current-review-data" data-review={JSON.stringify(review)}></div>
-        <div class="flex flex-col items-center justify-center">
-            <h2 class="text-2xl font-bold text-center">
-                Look's like you already reviewed this page
-            </h2>
-            <p class="text-center">
-                You can edit your review by clicking the button below
-            </p>
-            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 edit-review">
-                Edit Review
-            </button>
+<div
+    class="flex w-full flex-col justify-center items-center bg-zinc-900 p-4 rounded-md border-2 border-black my-8"
+>
+    {
+        review ? (
+            <>
+                <div
+                    id="current-review-data"
+                    data-review={JSON.stringify(review)}
+                />
+                <Typography
+                    variant="body"
+                    class="text-center"
+                    color="white"
+                    as="h2"
+                >
+                    Nice to see you again,
+                    <span class="text-purple-300">{review.Users.username}</span>
+                    <Twemoji emoji="👋" />
+                </Typography>
 
-            <Modal buttonSelector=".edit-review"> 
-                <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
-                    <h2 class="text-lg font-medium text-center">
-                        Edit your review <Twemoji emoji="📝" />
-                    </h2>
-                    <p class="text-center text-sm">
-                        You can edit your review here
-                    </p>
+                <Typography
+                    variant="small"
+                    class="text-center"
+                    color="white"
+                    as="p"
+                >
+                    You already left a rating of{" "}
+                    <span class="text-yellow-400">
+                        {review.GuestBook.calification}
+                    </span>{" "}
+                    stars
+                </Typography>
 
-                    <form class="w-full mt-4">
-                        <label
-                            for="review"
-                            class="block text-sm font-medium text-white"
-                        >
-                            Review
-                        </label>
-                        <textarea
-                            id="review"
-                            name="review"
-                            rows="3"
-                            class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        >
-                            {review.message}
-                        </textarea>
+                <button class="bg-purple-500 text-white px-4 py-2 rounded-lg mt-4 edit-review flex items-center hover:bg-purple-600 transition-colors">
+                    <PenLineIcon class="w-5 h-5 mr-2" />
+                    I'd like to edit my review
+                </button>
+                <Modal buttonSelector=".edit-review">
+                    <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
+                        <h2 class="text-lg font-medium text-center">
+                            Edit your review <Twemoji emoji="📝" />
+                        </h2>
+                        <p class="text-center text-sm">
+                            You can edit your review here
+                        </p>
 
-                        <div class="flex flex-col items-center mt-4">
-                            <div id="stars" class="flex mt-2"></div>
-
+                        <form class="w-full mt-4">
                             <label
-                                for="rating"
-                                class="block text-sm font-medium text-white mt-4"
+                                for="review"
+                                class="block text-sm font-medium text-white"
                             >
-                                Rating
+                                Review
                             </label>
-                            <input
-                                type="range"
-                                id="rating"
-                                name="rating"
-                                value={review.calification}
-                                min="1"
-                                max="5"
+                            <textarea
+                                id="review"
+                                name="review"
+                                maxlength="255"
+                                rows="3"
+                                class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            >
+                                {review.message}
+                            </textarea>
+
+                            <div class="flex flex-col items-center mt-4">
+                                <div id="stars" class="flex mt-2" />
+
+                                <label
+                                    for="rating"
+                                    class="block text-sm font-medium text-white mt-4"
+                                >
+                                    Rating
+                                </label>
+                                <input
+                                    type="range"
+                                    id="rating"
+                                    name="rating"
+                                    value={review.calification}
+                                    min="1"
+                                    max="5"
+                                    class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div class="flex items-center mt-4 space-x-4">
+                                <button
+                                    type="submit"
+                                    class="bg-purple-500 text-sm text-white px-4 py-2 rounded-lg submit-review flex items-center hover:bg-purple-600 transition-colors"
+                                >
+                                    Submit Review
+                                </button>
+
+                                <button class="bg-red-500 text-sm text-white px-4 py-2 rounded-lg delete-review flex items-center hover:bg-red-600 transition-colors">
+                                    Delete Review
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </Modal>
+            </>
+        ) : (
+            <div class="flex flex-col items-center justify-center">
+                <Typography
+                    variant="body"
+                    class="text-center"
+                    color="white"
+                    as="h2"
+                >
+                    Leave a review for this page
+                    <Twemoji emoji="✨" />
+                </Typography>
+                <Typography
+                    variant="small"
+                    class="text-center"
+                    color="white"
+                    as="p"
+                >
+                    Hope you enjoyed your time here, let me know what you think
+                </Typography>
+
+                <button class="bg-purple-500 mt-4 text-white px-4 py-2 rounded-lg leave-review flex items-center hover:bg-purple-600 transition-colors">
+                    <PenLineIcon class="w-5 h-5 mr-2" />
+                    Leave a review
+                </button>
+                <Modal buttonSelector=".leave-review">
+                    <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
+                        <h2 class="text-lg font-medium text-center">
+                            Leave a review <Twemoji emoji="📝" />
+                        </h2>
+                        <p class="text-center text-sm">
+                            You can leave a review here
+                        </p>
+
+                        <form class="w-full mt-4">
+                            <label
+                                for="review"
+                                class="block text-sm font-medium text-white"
+                            >
+                                Review
+                            </label>
+                            <textarea
+                                id="review"
+                                name="review"
+                                maxlength="255"
+                                rows="3"
                                 class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             />
-                        </div>
 
-                        <button
-                            type="submit"
-                            class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg submit-review"
-                        >
-                            Submit Review
-                        </button>
-                    </form>
-                </div>
-             </Modal>
-        </div>
-    ) : (
-        <div class="flex flex-col items-center justify-center">
-            <h2 class="text-2xl font-bold text-center">
-                Leave a review for this page
-            </h2>
-            <p class="text-center">
-                Let us know what you think about this page
-            </p>
-            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 leave-review">
-                Leave Review
-            </button>
+                            <div class="flex flex-col items-center mt-4">
+                                <div id="stars" class="flex mt-2" />
 
-            <Modal buttonSelector=".leave-review">
-                <div class="flex flex-col items-center justify-center bg-black p-4 rounded-lg border-2 border-zinc-800">
-                    <h2 class="text-lg font-medium text-center">
-                        Leave a review for this page <Twemoji emoji="✨" />
-                    </h2>
-                    <p class="text-center text-sm">
-                        Hope you enjoyed your time here, let me know what you
-                        think
-                    </p>
+                                <label
+                                    for="rating"
+                                    class="block text-sm font-medium text-white mt-4"
+                                >
+                                    Rating
+                                </label>
+                                <input
+                                    type="range"
+                                    id="rating"
+                                    name="rating"
+                                    value="3"
+                                    min="1"
+                                    max="5"
+                                    class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                />
+                            </div>
 
-                    <form class="w-full mt-4">
-                        <label
-                            for="review"
-                            class="block text-sm font-medium text-white"
-                        >
-                            Review
-                        </label>
-                        <textarea
-                            id="review"
-                            name="review"
-                            rows="3"
-                            class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        />
-
-                        <div class="flex flex-col items-center mt-4">
-                           
-                            <div id="stars" class="flex mt-2"></div>
-
-                            <label
-                                for="rating"
-                                class="block text-sm font-medium text-white mt-4"
+                            <button
+                                type="submit"
+                                class="mt-4 bg-purple-500 text-sm text-white px-4 py-2 rounded-lg submit-review flex items-center hover:bg-purple-600 transition-colors"
                             >
-                                Rating
-                            </label>
-                            <input
-                                type="range"
-                                id="rating"
-                                name="rating"
-                                value="3"
-                                min="1"
-                                max="5"
-                                class="mt-1 block w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg submit-review"
-                        >
-                            Submit Review
-                        </button>
-                    </form>
-                </div>
-            </Modal>
-        </div>
-    )
-}
-
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                </Modal>
+            </div>
+        )
+    }
+</div>
 <template id="star-icon">
     {/** SVG */}
     <StarIcon />
 </template>
 
 <script>
-  import { navigate } from 'astro:transitions/client';
+    import { navigate } from "astro:transitions/client";
     import { $ } from "@/lib/dom-selector";
 
-
     let calification = 3;
+
+    const deleteMyReview = async () => {
+        try {
+            const response = await fetch("/api/guest-book/comments.json", {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                console.log("Review deleted");
+                navigate(location.pathname);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const sendReview = async (review: string, rating: number) => {
         try {
@@ -170,7 +228,7 @@ const { review } = Astro.props;
                 },
                 body: JSON.stringify({
                     message: review,
-                    calification
+                    calification,
                 }),
             });
 
@@ -190,13 +248,13 @@ const { review } = Astro.props;
         stars.innerHTML = "";
 
         for (let i = 0; i < 5; i++) {
-            const star = document.getElementById("star-icon")?.content.cloneNode(
-                true
-            ) as HTMLElement;
+            const star = document
+                .getElementById("star-icon")
+                ?.content.cloneNode(true) as HTMLElement;
 
             const starIcon = star.querySelector("svg");
 
-            if(!starIcon) return;
+            if (!starIcon) return;
 
             if (i < calification) {
                 starIcon.classList.add("text-yellow-400");
@@ -211,6 +269,14 @@ const { review } = Astro.props;
     document.addEventListener("astro:page-load", () => {
         const rating = $("#rating") as HTMLInputElement;
         const $submitReview = $(".submit-review") as HTMLButtonElement;
+        const $deleteReview = $(".delete-review") as HTMLButtonElement;
+
+        if ($deleteReview) {
+            $deleteReview.addEventListener("click", (event) => {
+                event.preventDefault();
+                deleteMyReview();
+            });
+        }
 
         const currentReviewData = $("#current-review-data") as HTMLElement;
 
@@ -251,6 +317,4 @@ const { review } = Astro.props;
 
         handleRatingChange(calification);
     });
-
-
 </script>

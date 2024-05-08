@@ -100,3 +100,61 @@ export const POST: APIRoute = async ({ request }) => {
         });
     }
 }
+
+export const DELETE: APIRoute = async ({ request }) => {
+    const session = await getSession(request)
+
+    if (!session || !session.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
+
+    try {
+        // Self delete, we need to find the comment by the user id
+
+        const comment = await db.select().from(GuestBook).where(eq(GuestBook.userId, session.user.id))
+
+        if (!comment) {
+            return new Response(JSON.stringify({ error: "Comment not found" }), {
+                status: 404,
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+        }
+
+        try {
+            await db.delete(GuestBook).where(eq(GuestBook.userId, session.user.id));
+            return new Response(JSON.stringify({ message: "Comment deleted successfully" }), {
+                status: 200,
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+
+        } catch (error) {
+            console.error(error);
+            return new Response(JSON.stringify({ error: "Error deleting your comment" }), {
+                status: 500,
+                headers: {
+                    "content-type": "application/json",
+                },
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        return new Response(JSON.stringify({ error: "There was an error processing your request" }), {
+            status: 400,
+            headers: {
+                "content-type": "application/json",
+            },
+        });
+    }
+}
+
+
+

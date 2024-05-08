@@ -68,12 +68,12 @@ const currentUserReview = reviews.find(
                         <div class="flex items-center justify-center gap-4 mt-8">
                             <img
                                 class="size-12 rounded-full"
-                                src={session.user.image}
-                                alt={`Avatar del usuario ${session.user.name}`}
+                                src={session?.user?.image}
+                                alt={`Avatar del usuario ${session?.user?.name}`}
                             />
                             <div class="flex flex-col justify-center">
                                 <h4 class="text-lg font-bold">
-                                    {session.user.name}
+                                    {session?.user?.name}
                                 </h4>
                                 <button
                                     id="logout"
