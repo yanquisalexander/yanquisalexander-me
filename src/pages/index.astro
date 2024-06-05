@@ -19,15 +19,14 @@ import HomeSectionContainer from "@/components/HomeSectionContainer.astro";
 >
 	<HomeHero />
 
+	<HomeSectionContainer id="projects" title="Projects">
+		<SparklesIcon class="inline-block w-6 h-6 mr-2" slot="icon" />
+		<ProjectsBento />
+	</HomeSectionContainer>
 	<HomeSectionContainer id="experience" title="Experience">
 		<ClockUpIcon class="inline-block w-6 h-6 mr-2" slot="icon" />
 
 		<Experience />
-	</HomeSectionContainer>
-
-	<HomeSectionContainer id="projects" title="Projects">
-		<SparklesIcon class="inline-block w-6 h-6 mr-2" slot="icon" />
-		<ProjectsBento />
 	</HomeSectionContainer>
 
 	<HomeSectionContainer id="about" title="About Me">
