@@ -20,6 +20,19 @@ export default {
 				...defaultTheme.screens,
 				"3xl": "1650px",
 			},
+			animation: {
+				'wiggle': 'wiggle var(--tw-animate-duration, 1s) var(--tw-animate-easing, ease) var(--tw-animate-delay, 0s) var(--tw-animate-iteration, 1) var(--tw-animate-fill, both)',
+			},
+			keyframes: {
+				'wiggle': {
+					'0%, 100%': {
+						transform: 'rotate(-3deg)',
+					},
+					'50%': {
+						transform: 'rotate(3deg)',
+					},
+				},
+			}
 		},
 	},
 	plugins: [
