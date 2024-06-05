@@ -4,6 +4,7 @@ import FeaturedButton from "./FeaturedButton.astro";
 import BrandNuxtIcon from "@/icons/BrandNuxtIcon.astro";
 import BrandTwitchIcon from "@/icons/BrandTwitchIcon.astro";
 import ExternalLinkIcon from "@/icons/ExternalLinkIcon.astro";
+import { Tailwind, TypeScript } from "@react-symbols/icons";
 
 // Force the inclusion of the classes we need
 const includedClasses = [
@@ -32,38 +33,51 @@ const TAGS = {
     Nuxt: {
         name: "Nuxt.js",
         classes: "bg-gradient-to-br from-green-400 to-blue-500 text-white",
-        icon: BrandNuxtIcon,
     },
     Express: {
-        name: "Twitch API",
+        name: "Express.js",
         classes: "bg-[#9146FF] text-white",
-        icon: BrandTwitchIcon,
+    },
+    Tailwind: {
+        name: "Tailwind CSS",
+        classes: "bg-[#06B6D4] text-white",
+    },
+    TypeScript: {
+        name: "TypeScript",
+        classes: "bg-[#3178C6] text-white",
+    },
+    Astro: {
+        name: "Astro",
+        classes: "bg-[#0D68F2] text-white",
     },
 };
 
 const PROJECTS: Project[] = [
     {
-        title: "Petruquio.LIVE",
-        image: "https://petruquiolive-next.vercel.app/images/petruquiolive_banner.webp",
-        link: "https://petruquio.live",
-        description: `
-Petruquio.LIVE is an AI-powered chatbot that helps you
-					manage your Twitch channel. It can help you with moderation,
-					channel points, and more!
-                    `,
-        colSpan: 2,
-        tags: [TAGS.Nuxt, TAGS.Express],
+        title: "RetosJS",
+        image: "/images/retosjs.webp",
+        link: "https://retosjavascript.vercel.app/",
+        description:
+            "JavaScript challenges for beginners and advanced developers.",
+        tags: [TAGS.Astro, TAGS.TypeScript, TAGS.Tailwind],
+    },
+    {
+        title: "Application of forms for Farms in Southern Chile",
+        image: "/images/farm-app.webp",
+        description:
+            "Application for the management of forms for farms in southern Chile.",
+        tags: [TAGS.Nuxt, TAGS.Tailwind],
     },
 ];
 ---
 
 <div
-    class="grid md:auto-rows-[20rem] grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-12"
+    class="grid md:auto-rows-[20rem] grid-cols-1 md:grid-cols-3 gap-4 mx-auto mb-12"
 >
     {
         PROJECTS.map((project, index) => (
             <div
-                class={`row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input p-4  bg-white border border-transparent justify-between flex flex-col space-y-4 
+                class={`row-span-1 rounded-xl group/bento hover:shadow-xl transition duration-200 shadow-input p-4  bg-white/10 border border-transparent justify-between flex flex-col space-y-4 
                     ${index % 3 === 0 ? "md:col-span-2" : "col-span-1"}`}
             >
                 <div
@@ -75,17 +89,23 @@ Petruquio.LIVE is an AI-powered chatbot that helps you
                     }}
                 />
                 <div class="group-hover/bento:translate-x-2 transition duration-200">
-                    <div class="font-sans font-bold text-neutral-600 dark:text-neutral-200 mb-2 mt-2">
+                    <a
+                        class="font-sans font-bold text-neutral-200 mb-2 mt-2 hover:underline"
+                        href={project.link}
+                        target="_blank"
+                    >
                         {project.title}
-                    </div>
-                    <div class="font-sans font-normal text-neutral-600 text-xs dark:text-neutral-300">
+                    </a>
+                    <div class="font-sans font-normal text-xs text-neutral-300">
                         {project.description}
                     </div>
                     {project.tags && (
                         <div class="flex flex-row flex-wrap mt-2 space-x-2">
                             {project.tags.map((tag, tagIndex) => (
                                 <Badge>
-                                    <tag.icon class="w-4 h-4 mr-2" />
+                                    {tag.icon && (
+                                        <tag.icon class="w-4 h-4 mr-2 inline-block" />
+                                    )}
                                     {tag.name}
                                 </Badge>
                             ))}
@@ -93,14 +113,16 @@ Petruquio.LIVE is an AI-powered chatbot that helps you
                     )}
                     <footer class="flex flex-row justify-between items-center mt-4">
                         <div class="font-sans font-normal text-neutral-600 text-xs dark:text-neutral-300">
-                            <a
-                                href={project.link}
-                                target="_blank"
-                                class="flex flex-row items-center space-x-1"
-                            >
-                                <ExternalLinkIcon class="w-4 h-4 mr-2" />
-                                {project.link}
-                            </a>
+                            {project.link && (
+                                <a
+                                    href={project.link}
+                                    target="_blank"
+                                    class="flex flex-row items-center space-x-1"
+                                >
+                                    <ExternalLinkIcon class="w-4 h-4 mr-2" />
+                                    {project.link}
+                                </a>
+                            )}
                         </div>
                     </footer>
                 </div>

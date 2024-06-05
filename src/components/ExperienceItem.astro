@@ -13,22 +13,22 @@ interface Props {
 const { title, description, link, date } = Astro.props;
 ---
 
-<div
-    class="absolute w-3 h-3 bg-purple-300 rounded-full mt-1.5 -start-1.5 border border-violet-300"
->
-</div>
-<time class="text-sm font-normal leading-none text-slate-400">{date}</time>
-<h3 class="mt-3 text-lg leading-6 font-bold text-violet-400">
-    {title}
-</h3>
-<p class="mb-4 text-base text-pretty font-normal text-slate-200/80">
-    {description}
-</p>
-{
-    link && (
-        <FeaturedButton href={link}>
-            <SearchIcon class="w-4 h-4 mr-1.5" />
-            See more details about this
-        </FeaturedButton>
-    )
-}
+<article class="flex flex-col bg-violet-500/10 p-4 rounded-md">
+    <time class="text-sm font-normal leading-none text-slate-400">{date}</time>
+    <h3 class="mt-3 text-lg leading-6 font-bold text-violet-400">
+        {title}
+    </h3>
+    <p class="mb-4 text-base text-pretty font-normal text-slate-200/80">
+        {description}
+    </p>
+    {
+        link && (
+            <div class="flex justify-end">
+                <FeaturedButton href={link}>
+                    <SearchIcon class="w-4 h-4 mr-1.5" />
+                    See more details about this
+                </FeaturedButton>
+            </div>
+        )
+    }
+</article>
