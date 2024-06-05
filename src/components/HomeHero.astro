@@ -4,9 +4,10 @@ import SparklesIcon from "@/icons/SparklesIcon.astro";
 import HiglightedText from "./HiglightedText.astro";
 import FeaturedButton from "./FeaturedButton.astro";
 import FilePencilIcon from "@/icons/FilePencilIcon.astro";
+import HeroSocial from "./HeroSocial.astro";
 ---
 
-<section class="landing h-screen text-white">
+<section class="landing h-screen md:h-85vh] text-white">
     <div
         class="flex h-full md:max-w-5xl items-center flex-col md:gap-8 justify-center"
     >
@@ -49,7 +50,7 @@ import FilePencilIcon from "@/icons/FilePencilIcon.astro";
                 </h2>
             </h1>
             <footer
-                class="flex py-8 flex-col md:flex-row gap-4 animate-fade-in-down animate-delay-[200ms]"
+                class="flex pt-8 pb-4 flex-col md:flex-row gap-4 animate-fade-in-down animate-delay-[200ms]"
             >
                 <FeaturedButton
                     href="https://resume.io/r/5KDzmafS4"
@@ -67,6 +68,9 @@ import FilePencilIcon from "@/icons/FilePencilIcon.astro";
                     >Learn more about me</button
                 >
             </footer>
+            <section class="animate-fade-in-down animate-delay-[220ms]">
+                <HeroSocial />
+            </section>
         </div>
     </div>
 </section>

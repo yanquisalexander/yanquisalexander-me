@@ -13,7 +13,9 @@ interface Props {
 const { title, description, link, date } = Astro.props;
 ---
 
-<article class="flex flex-col bg-violet-500/10 p-4 rounded-md">
+<article
+    class="flex flex-col bg-violet-500/10 p-4 rounded-md border-purple-400/25 border"
+>
     <time class="text-sm font-normal leading-none text-slate-400">{date}</time>
     <h3 class="mt-3 text-lg leading-6 font-bold text-violet-400">
         {title}

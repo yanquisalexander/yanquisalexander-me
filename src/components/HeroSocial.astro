@@ -1,0 +1,44 @@
+---
+import BrandGitHubIcon from "@/icons/BrandGitHubIcon.astro";
+import BrandLinkedInIcon from "@/icons/BrandLinkedInIcon.astro";
+import BrandTwitchIcon from "@/icons/BrandTwitchIcon.astro";
+import Badge from "./Badge.astro";
+
+const SOCIAL_NETWORKS = [
+    {
+        name: "GitHub",
+        url: "https://github.com/yanquisalexander",
+        icon: BrandGitHubIcon,
+    },
+    {
+        name: "LinkedIn",
+        url: "https://www.linkedin.com/in/yanquisalex/",
+        icon: BrandLinkedInIcon,
+    },
+    {
+        name: "Twitch",
+        url: "https://www.twitch.tv/alexitoo_uy",
+        icon: BrandTwitchIcon,
+    },
+];
+---
+
+<div class="flex justify-center items-center space-x-4">
+    {
+        SOCIAL_NETWORKS.map((s) => (
+            <>
+                <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-white hover:text-blue-300 transition-colors duration-300"
+                >
+                    <Badge>
+                        <s.icon class="w-6 h-6 mr-2" />
+                        {s.name}
+                    </Badge>
+                </a>
+            </>
+        ))
+    }
+</div>
