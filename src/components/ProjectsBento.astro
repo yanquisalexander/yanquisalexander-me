@@ -89,13 +89,20 @@ const PROJECTS: Project[] = [
                     }}
                 />
                 <div class="group-hover/bento:translate-x-2 transition duration-200">
-                    <a
-                        class={`font-sans font-bold text-neutral-200 mb-2 mt-2 ${project.link ? "hover:underline" : ""}`}
-                        href={project.link}
-                        target="_blank"
-                    >
-                        {project.title}
-                    </a>
+                    {project.link ? (
+                        <a
+                            class="font-sans font-bold text-neutral-200 mb-2 mt-2 hover:underline"
+                            href={project.link}
+                            target="_blank"
+                        >
+                            {project.title}
+                        </a>
+                    ) : (
+                        <h2 class="font-sans font-bold text-neutral-200 mb-2 mt-2">
+                            {project.title}
+                        </h2>
+                    )}
+
                     <div class="font-sans font-normal text-xs text-neutral-300">
                         {project.description}
                     </div>
