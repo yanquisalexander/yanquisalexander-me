@@ -35,7 +35,7 @@ jobs:
         run: "npm i --force"
 
       - name: Build step
-        run: "npm run build"
+        run: "npm run build --remote"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
