@@ -60,7 +60,7 @@
 
         window.addEventListener("scroll", throttledScrollHandler);
 
-        $button.addEventListener("click", () => {
+        $button?.addEventListener("click", () => {
             window.scrollTo({ top: 0, behavior: "smooth" });
         });
     });
