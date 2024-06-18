@@ -32,7 +32,7 @@ jobs:
         run: deno install npm:pnpm
 
       - name: Install step
-        run: "pnpm install --allow-sys"
+        run: "pnpm --allow-sys install"
 
       - name: Build step
         run: "pnpm run build"
