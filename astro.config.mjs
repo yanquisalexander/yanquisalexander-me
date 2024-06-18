@@ -13,10 +13,10 @@ export default defineConfig({
   site: "https://www.yanquisalexander.me",
   integrations: [tailwind(), sitemap(), auth(), db(), react()],
   output: "server",
-  adapter: deno()
-  /* adapter: vercel({
+  //adapter: deno()
+  adapter: vercel({
     webAnalytics: {
       enabled: true
     }
-  }) */
+  })
 });
