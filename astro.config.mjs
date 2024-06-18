@@ -3,6 +3,7 @@ import tailwind from "@astrojs/tailwind";
 import sitemap from "@astrojs/sitemap";
 import auth from "auth-astro";
 import vercel from "@astrojs/vercel/serverless";
+import deno from "@astrojs/deno";
 import db from "@astrojs/db";
 
 import react from "@astrojs/react";
@@ -12,9 +13,10 @@ export default defineConfig({
   site: "https://www.yanquisalexander.me",
   integrations: [tailwind(), sitemap(), auth(), db(), react()],
   output: "server",
-  adapter: vercel({
+  adapter: deno()
+  /* adapter: vercel({
     webAnalytics: {
       enabled: true
     }
-  })
+  }) */
 });
