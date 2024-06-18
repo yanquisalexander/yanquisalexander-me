@@ -32,10 +32,10 @@ jobs:
         run: deno install npm:pnpm
 
       - name: Install step
-        run: "pnpm --allow-sys install"
+        run: "npm i --force"
 
       - name: Build step
-        run: "pnpm run build"
+        run: "npm run build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
