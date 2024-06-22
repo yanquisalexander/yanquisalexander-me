@@ -331,9 +331,31 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         );
 
         const speak = (text: string, lang = "es-UY") => {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
-            speechSynthesis.speak(utterance);
+            // If the queue is empty, speak the message
+
+            const playWithStreamElements = () => {
+                const audio = new Audio(
+                    `hhttps://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
+                );
+                audio.play();
+            };
+
+            const supportsNativeTTS =
+                speechSynthesis && speechSynthesis.getVoices().length > 0;
+
+            if (ttsQueue.length === 0) {
+                if (!supportsNativeTTS) {
+                    playWithStreamElements();
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang;
+                speechSynthesis.speak(utterance);
+            } else {
+                // If the queue is not empty, add the message to the queue
+                ttsQueue.push({ message: text });
+            }
         };
 
         setInterval(() => {
