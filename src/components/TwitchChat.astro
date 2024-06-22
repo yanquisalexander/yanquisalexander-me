@@ -340,8 +340,8 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 audio.play();
             };
 
-            const supportsNativeTTS =
-                speechSynthesis && speechSynthesis.getVoices().length > 0;
+            const supportsNativeTTS = false;
+            //speechSynthesis && speechSynthesis.getVoices().length > 0;
 
             if (ttsQueue.length === 0) {
                 if (!supportsNativeTTS) {
