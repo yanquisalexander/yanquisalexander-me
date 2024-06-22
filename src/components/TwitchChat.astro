@@ -48,6 +48,11 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             type?: "sub-gifted" | "community-gifted" | "bits" | "raid";
         }
 
+        interface TTSQueue {
+            message: string;
+            lang?: string;
+        }
+
         import { ChatClient } from "@twurple/chat";
         import {
             type Command,
@@ -62,6 +67,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
 
         const toastQueue: Toast[] = [];
         const commands: Command[] = [];
+        const ttsQueue: TTSQueue[] = [];
         const token = document
             .querySelector("[data-token]")
             ?.getAttribute("data-token");
@@ -73,6 +79,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         const authProvider = createAuthProvider({
             token,
         });
+        888;
 
         const chatClient = new ChatClient({
             authProvider,
@@ -90,6 +97,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         chatClient.connect();
 
         const TIME_BETWEEN_TOASTS = 2500;
+        const TIME_BETWEEN_TTS = 5000;
         const $chatList = document.getElementById("twitch-chat");
         const $topToast = document.getElementById("top-toast");
         const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
@@ -146,13 +154,25 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 $badges?.appendChild($badge);
             }
 
+            // Replace the !speak text with an image (Keep the rest intact because later we will parse emotes)
+            if (message.startsWith("!speak")) {
+                const $horn = document.createElement("img");
+                $horn.src =
+                    "https://cdn-icons-png.flaticon.com/512/1711/1711789.png";
+                $horn.classList.add("message-emote");
+
+                message = message.replace("!speak", $horn.outerHTML);
+            }
+
+            let messageContent = message;
+
             // Parse emotes (Twurple)
             const emotes = context.emoteOffsets;
             if (emotes) {
-                $message!.innerHTML = parseEmotes(message, emotes);
-            } else {
-                $message!.textContent = message;
+                messageContent = parseEmotes(message, emotes);
             }
+
+            $message!.innerHTML = messageContent;
 
             $message!.style.fontSize = "1rem";
 
@@ -299,6 +319,30 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 },
             }),
         );
+
+        commands.push(
+            createCommand({
+                command: "speak",
+                execute: (text) => {
+                    const message = text.split(" ").slice(1).join(" ");
+                    ttsQueue.push({ message });
+                },
+            }),
+        );
+
+        const speak = (text: string, lang = "es-UY") => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            speechSynthesis.speak(utterance);
+        };
+
+        setInterval(() => {
+            const tts = ttsQueue.shift();
+
+            if (tts) {
+                speak(tts.message);
+            }
+        }, TIME_BETWEEN_TTS);
     </script>
 
     <style is:inline>
