@@ -80,6 +80,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
 
         chatClient.connect();
 
+        const TIME_BETWEEN_TOASTS = 2500;
         const $chatList = document.getElementById("twitch-chat");
         const $topToast = document.getElementById("top-toast");
         const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
@@ -235,7 +236,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
 
                     // Show the next toast
                     showNextToast();
-                }, 500);
+                }, TIME_BETWEEN_TOASTS);
             }, toast.duration);
         };
 
@@ -244,6 +245,11 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 displayName: context.userInfo.displayName,
                 message: text,
                 context,
+            });
+            addToast({
+                title: context.userInfo.displayName,
+                message: text,
+                duration: 5000,
             });
         });
 
