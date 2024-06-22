@@ -249,13 +249,8 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 message: text,
                 context,
             });
-            addToast({
-                title: context.userInfo.displayName,
-                message: text,
-                duration: 5000,
-            });
         });
-
+        P;
         chatClient.onMessageRemove((channel, messageId) => {
             const $message = document.querySelector(
                 `[data-message-id="${messageId}"] .message`,
