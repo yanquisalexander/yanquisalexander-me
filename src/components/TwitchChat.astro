@@ -25,9 +25,25 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             </p>
         </div>
     </template>
+
+    <template id="notice_item">
+        <div
+            class="px-4 py-1 bg-[#18181b] rounded-lg animate-fade-in-right mb-3 max-w-md"
+        >
+            <p
+                class="message text-white opacity-80 italic text-normal whitespace-pre-wrap break-words"
+            >
+            </p>
+        </div>
+    </template>
 </TwitchLayout>
 
 <script>
+    interface AddNoticeParams {
+        message: string;
+        type: "slow-mode" | "sub-only" | "r9k" | "emote-only";
+    }
+
     import { ChatClient } from "@twurple/chat";
     import {
         createAuthProvider,
@@ -151,8 +167,26 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         });
     };
 
+    const addNotice = ({ message, type }: AddNoticeParams) => {
+        return;
+        const $template = document.getElementById(
+            "notice_item",
+        ) as HTMLTemplateElement;
+        const $clone = $template.content.cloneNode(true) as DocumentFragment;
+        const $message = $clone.querySelector(".message") as HTMLElement;
+
+        $message!.textContent = message;
+
+        $chatList?.appendChild($clone);
+
+        // Scroll to the bottom
+        $chatList?.scrollTo({
+            top: $chatList.scrollHeight,
+            behavior: "smooth",
+        });
+    }; // For a future implementation
+
     chatClient.onMessage((channel, username, text, context) => {
-        console.log({ channel, username, text, context });
         addMessage({
             displayName: context.userInfo.displayName,
             message: text,
@@ -169,6 +203,24 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             // replace with a message removed message
             $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
         }
+    });
+
+    chatClient.onSubsOnly((channel, enabled) => {
+        addNotice({
+            message: enabled
+                ? "El chat ahora es solo para suscriptores"
+                : "El chat ya no es solo para suscriptores",
+            type: "sub-only",
+        });
+    });
+
+    chatClient.onEmoteOnly((channel, enabled) => {
+        addNotice({
+            message: enabled
+                ? "El chat ahora es solo para emotes"
+                : "El chat ya no es solo para emotes",
+            type: "emote-only",
+        });
     });
 </script>
 
