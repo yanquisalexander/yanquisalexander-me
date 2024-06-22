@@ -23,7 +23,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         <template id="chatlist_item">
             <div
                 data-message-id
-                class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-2 w-full"
+                class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-1 w-full"
             >
                 <span class="meta" style="color: {color}">
                     <span class="badges inline-block"> </span>
@@ -133,7 +133,6 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 ?.setAttribute("data-message-id", context.id);
 
             const { userInfo } = context;
-            console.log(context);
 
             const color = userInfo.color || "#fff";
 
