@@ -250,7 +250,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 context,
             });
         });
-        P;
+
         chatClient.onMessageRemove((channel, messageId) => {
             const $message = document.querySelector(
                 `[data-message-id="${messageId}"] .message`,
