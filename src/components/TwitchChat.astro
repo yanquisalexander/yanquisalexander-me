@@ -337,6 +337,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 const audio = new Audio(
                     `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
                 );
+                audio.volume = 0.5;
                 audio.play();
             };
 
