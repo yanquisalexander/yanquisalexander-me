@@ -9,232 +9,288 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
     >
     </div>
 
-    <template id="chatlist_item">
-        <div
-            data-message-id
-            class="px-4 py-2 bg-[#18181b] rounded-lg animate-fade-in-right mb-3 max-w-md"
-        >
-            <span class="meta" style="color: {color}">
-                <span class="badges inline-block"> </span>
-                <span class="name font-semibold"></span>
-            </span>
+    <div
+        id="top-toast"
+        class="hidden fixed top-4 inset-x-0 max-w-md mx-auto bg-[#6441a5] rounded-xl"
+    >
+        <h2 class="text-white text-center text-lg font-semibold">
+            Bienvenidos
+        </h2>
+        <p class="text-white text-center text-sm">Este es el chat de Twitch</p>
+        <!-- Reversed progressbar, because has a time in seconds (use requestAnimationFrame)
+        On finish, hide the toast with animate-fade-out-up -->
 
-            <p
-                class="message text-white text-normal whitespace-pre-wrap break-words"
+        <template id="chatlist_item">
+            <div
+                data-message-id
+                class="px-4 py-2 bg-[#18181b] rounded-lg animate-fade-in-right mb-3 max-w-md"
             >
-            </p>
-        </div>
-    </template>
+                <span class="meta" style="color: {color}">
+                    <span class="badges inline-block"> </span>
+                    <span class="name font-semibold"></span>
+                </span>
 
-    <template id="notice_item">
-        <div
-            class="px-4 py-1 bg-[#18181b] rounded-lg animate-fade-in-right mb-3 max-w-md"
-        >
-            <p
-                class="message text-white opacity-80 italic text-normal whitespace-pre-wrap break-words"
-            >
-            </p>
-        </div>
-    </template>
-</TwitchLayout>
+                <p
+                    class="message text-white text-normal whitespace-pre-wrap break-words"
+                >
+                </p>
+            </div>
+        </template>
+    </div>
 
-<script>
-    interface AddNoticeParams {
-        message: string;
-        type: "slow-mode" | "sub-only" | "r9k" | "emote-only";
-    }
-
-    import { ChatClient } from "@twurple/chat";
-    import {
-        createAuthProvider,
-        createApiClient,
-        BROADCASTER_ID,
-    } from "@/lib/Twitch";
-    import type { ChatMessage } from "node_modules/@twurple/chat/lib/ChatMessage";
-
-    const token = document
-        .querySelector("[data-token]")
-        ?.getAttribute("data-token");
-
-    if (!token) {
-        throw new Error("Twitch token not found");
-    }
-
-    const authProvider = createAuthProvider({
-        token,
-    });
-
-    const chatClient = new ChatClient({
-        authProvider,
-        channels: ["alexitoo_uy"],
-    });
-
-    const apiClient = createApiClient({ authProvider });
-
-    const globalBadges = await apiClient.chat.getGlobalBadges();
-    const channelBadges = await apiClient.chat.getChannelBadges(BROADCASTER_ID);
-
-    chatClient.connect();
-
-    const $chatList = document.getElementById("twitch-chat");
-
-    const addMessage = ({
-        displayName,
-        message,
-        context,
-    }: {
-        displayName: string;
-        message: string;
-        context: ChatMessage;
-    }) => {
-        const $template = document.getElementById(
-            "chatlist_item",
-        ) as HTMLTemplateElement;
-        const $clone = $template.content.cloneNode(true) as DocumentFragment;
-        const $message = $clone.querySelector(".message") as HTMLElement;
-        const $name = $clone.querySelector(".name");
-        const $badges = $clone.querySelector(".badges");
-        const $meta = $clone.querySelector(".meta") as HTMLElement;
-
-        $clone
-            .querySelector("[data-message-id]")
-            ?.setAttribute("data-message-id", context.id);
-
-        const { userInfo } = context;
-        console.log(context);
-
-        const color = userInfo.color || "#fff";
-
-        $name!.textContent = displayName;
-        $meta!.style.color = color;
-
-        const badges = Object.fromEntries(userInfo.badges);
-
-        for (const [key, value] of Object.entries(badges)) {
-            // Get badge (priority: channel > global)
-            const badge =
-                channelBadges.find((b) => b.id === key) ||
-                globalBadges.find((b) => b.id === key);
-
-            if (!badge) {
-                continue;
-            }
-
-            const $badge = document.createElement("img");
-            $badge.classList.add("chat-badge");
-            $badge.src = badge.versions
-                .find((v) => v.id === value)
-                ?.getImageUrl(1) as string;
-
-            $badges?.appendChild($badge);
+    <script>
+        interface Toast {
+            title?: string;
+            message: string;
+            duration: number;
+            backgroundColor?: string;
+            type?: "sub-gifted" | "community-gifted" | "bits" | "raid";
         }
 
-        // Parse emotes (Twurple)
-        const emotes = context.emoteOffsets;
-        if (emotes) {
-            const emoteSet = Object.fromEntries(emotes);
-            const parts = [];
-            let lastIndex = 0;
+        import { ChatClient } from "@twurple/chat";
+        import {
+            createAuthProvider,
+            createApiClient,
+            BROADCASTER_ID,
+        } from "@/lib/Twitch";
 
-            // Create a new message by replacing emotes with their corresponding images
-            let newMessage = message;
+        const toastQueue: Toast[] = [];
+        const token = document
+            .querySelector("[data-token]")
+            ?.getAttribute("data-token");
 
-            for (const [key, value] of Object.entries(emoteSet)) {
-                const [start, end] = value[0].split("-").map(Number);
-                const emoteText = message.slice(start, end + 1);
-
-                const $emote = document.createElement("img");
-                $emote.classList.add("message-emote");
-                $emote.src = `https://static-cdn.jtvnw.net/emoticons/v2/${key}/default/dark/1.0`;
-
-                // Replace emote text with image HTML (All occurrences)
-                newMessage = newMessage.replaceAll(emoteText, $emote.outerHTML);
-            }
-
-            $message!.innerHTML = newMessage;
-        } else {
-            $message!.textContent = message;
+        if (!token) {
+            throw new Error("Twitch token not found");
         }
 
-        $message!.style.fontSize = "1rem";
-
-        $chatList?.appendChild($clone);
-
-        // Scroll to the bottom
-        $chatList?.scrollTo({
-            top: $chatList.scrollHeight,
-            behavior: "smooth",
+        const authProvider = createAuthProvider({
+            token,
         });
-    };
 
-    const addNotice = ({ message, type }: AddNoticeParams) => {
-        return;
-        const $template = document.getElementById(
-            "notice_item",
-        ) as HTMLTemplateElement;
-        const $clone = $template.content.cloneNode(true) as DocumentFragment;
-        const $message = $clone.querySelector(".message") as HTMLElement;
-
-        $message!.textContent = message;
-
-        $chatList?.appendChild($clone);
-
-        // Scroll to the bottom
-        $chatList?.scrollTo({
-            top: $chatList.scrollHeight,
-            behavior: "smooth",
+        const chatClient = new ChatClient({
+            authProvider,
+            channels: ["alexitoo_uy"],
         });
-    }; // For a future implementation
 
-    chatClient.onMessage((channel, username, text, context) => {
-        addMessage({
-            displayName: context.userInfo.displayName,
-            message: text,
+        const apiClient = createApiClient({ authProvider });
+
+        const globalBadges = await apiClient.chat.getGlobalBadges();
+        const channelBadges =
+            await apiClient.chat.getChannelBadges(BROADCASTER_ID);
+
+        chatClient.connect();
+
+        const $chatList = document.getElementById("twitch-chat");
+        const $topToast = document.getElementById("top-toast");
+        const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
+
+        const addMessage = ({
+            displayName,
+            message,
             context,
+        }: {
+            displayName: string;
+            message: string;
+            context: ChatMessage;
+        }) => {
+            const $template = document.getElementById(
+                "chatlist_item",
+            ) as HTMLTemplateElement;
+            const $clone = $template.content.cloneNode(
+                true,
+            ) as DocumentFragment;
+            const $message = $clone.querySelector(".message") as HTMLElement;
+            const $name = $clone.querySelector(".name");
+            const $badges = $clone.querySelector(".badges");
+            const $meta = $clone.querySelector(".meta") as HTMLElement;
+
+            $clone
+                .querySelector("[data-message-id]")
+                ?.setAttribute("data-message-id", context.id);
+
+            const { userInfo } = context;
+            console.log(context);
+
+            const color = userInfo.color || "#fff";
+
+            $name!.textContent = displayName;
+            $meta!.style.color = color;
+
+            const badges = Object.fromEntries(userInfo.badges);
+
+            for (const [key, value] of Object.entries(badges)) {
+                // Get badge (priority: channel > global)
+                const badge =
+                    channelBadges.find((b) => b.id === key) ||
+                    globalBadges.find((b) => b.id === key);
+
+                if (!badge) {
+                    continue;
+                }
+
+                const $badge = document.createElement("img");
+                $badge.classList.add("chat-badge");
+                $badge.src = badge.versions
+                    .find((v) => v.id === value)
+                    ?.getImageUrl(1) as string;
+
+                $badges?.appendChild($badge);
+            }
+
+            // Parse emotes (Twurple)
+            const emotes = context.emoteOffsets;
+            if (emotes) {
+                const emoteSet = Object.fromEntries(emotes);
+                const parts = [];
+                let lastIndex = 0;
+
+                // Create a new message by replacing emotes with their corresponding images
+                let newMessage = message;
+
+                for (const [key, value] of Object.entries(emoteSet)) {
+                    const [start, end] = value[0].split("-").map(Number);
+                    const emoteText = message.slice(start, end + 1);
+
+                    const $emote = document.createElement("img");
+                    $emote.classList.add("message-emote");
+                    $emote.src = `https://static-cdn.jtvnw.net/emoticons/v2/${key}/default/dark/1.0`;
+
+                    // Replace emote text with image HTML (All occurrences)
+                    newMessage = newMessage.replaceAll(
+                        emoteText,
+                        $emote.outerHTML,
+                    );
+                }
+
+                $message!.innerHTML = newMessage;
+            } else {
+                $message!.textContent = message;
+            }
+
+            $message!.style.fontSize = "1rem";
+
+            $chatList?.appendChild($clone);
+
+            // Scroll to the bottom
+            $chatList?.scrollTo({
+                top: $chatList.scrollHeight,
+                behavior: "smooth",
+            });
+        };
+
+        const addToast = (toast: Toast) => {
+            toastQueue.push(toast);
+
+            if (toastQueue.length === 1) {
+                showNextToast();
+            }
+        };
+
+        const showNextToast = () => {
+            const toast = toastQueue[0];
+
+            if (!toast) {
+                return;
+            }
+
+            if (!$topToast) {
+                return;
+            }
+
+            // replace toast h2 and p with toast.title and toast.message
+            $topToast.querySelector("h2")!.textContent = toast.title || "";
+            $topToast.querySelector("p")!.textContent = toast.message;
+
+            // Add toast type class
+            if (toast.type) {
+                $topToast.classList.add(`bg-${toast.type}`);
+            }
+
+            if (toast.backgroundColor) {
+                // Reset the class list, then add the background color
+                $topToast.className = $originalToast.className;
+                $topToast.classList.add(...toast.backgroundColor.split(" "));
+            }
+
+            // Show toast
+            $topToast.classList.remove("hidden");
+            $topToast.classList.add("animate-fade-in-up");
+
+            setTimeout(() => {
+                $topToast.classList.remove("animate-fade-in-up");
+                $topToast.classList.add("animate-fade-out-up");
+
+                setTimeout(() => {
+                    $topToast.classList.add("hidden");
+                    $topToast.classList.remove("animate-fade-out-up");
+
+                    // Remove toast type class
+                    if (toast.type) {
+                        $topToast.classList.remove(`bg-${toast.type}`);
+                    }
+
+                    // Remove the toast from the queue
+                    toastQueue.shift();
+
+                    // Show the next toast
+                    showNextToast();
+                }, 500);
+            }, toast.duration);
+        };
+
+        chatClient.onMessage((channel, username, text, context) => {
+            addMessage({
+                displayName: context.userInfo.displayName,
+                message: text,
+                context,
+            });
         });
-    });
 
-    chatClient.onMessageRemove((channel, messageId) => {
-        const $message = document.querySelector(
-            `[data-message-id="${messageId}"] .message`,
-        );
+        chatClient.onMessageRemove((channel, messageId) => {
+            const $message = document.querySelector(
+                `[data-message-id="${messageId}"] .message`,
+            );
 
-        if ($message) {
-            // replace with a message removed message
-            $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
+            if ($message) {
+                // replace with a message removed message
+                $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
+            }
+        });
+
+        chatClient.onAnnouncement((channel, user, info, data) => {
+            let backgroundColor;
+            //Colors are "PRIMARY", "BLUE", "GREEN", "ORANGE" and "PURPLE".
+
+            switch (info.color) {
+                case "PURPLE":
+                    backgroundColor =
+                        "bg-gradient-to-b from-violet-600 to-blue-500";
+                    break;
+                default:
+                    backgroundColor = "";
+                    break;
+            }
+            addToast({
+                title: "Anuncio",
+                message: data.text || "",
+                duration: 10000,
+                backgroundColor,
+            });
+        });
+    </script>
+
+    <style is:inline>
+        .message-emote {
+            display: inline-block;
+            height: 28px;
         }
-    });
 
-    chatClient.onSubsOnly((channel, enabled) => {
-        addNotice({
-            message: enabled
-                ? "El chat ahora es solo para suscriptores"
-                : "El chat ya no es solo para suscriptores",
-            type: "sub-only",
-        });
-    });
-
-    chatClient.onEmoteOnly((channel, enabled) => {
-        addNotice({
-            message: enabled
-                ? "El chat ahora es solo para emotes"
-                : "El chat ya no es solo para emotes",
-            type: "emote-only",
-        });
-    });
-</script>
-
-<style is:inline>
-    .message-emote {
-        display: inline-block;
-        height: 28px;
-    }
-
-    .chat-badge {
-        height: 24px;
-        margin-bottom: 0.15rem;
-        margin-right: 0.3rem;
-        vertical-align: middle;
-        display: inline-block;
-    }
-</style>
+        .chat-badge {
+            height: 24px;
+            margin-bottom: 0.15rem;
+            margin-right: 0.3rem;
+            vertical-align: middle;
+            display: inline-block;
+        }
+    </style>
+</TwitchLayout>
