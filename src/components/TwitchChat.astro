@@ -23,7 +23,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         <template id="chatlist_item">
             <div
                 data-message-id
-                class="px-4 py-2 animate-fade-in-right mb-3 max-w-md"
+                class="px-4 py-2 animate-fade-in-right animate-duration-250 mb-3 max-w-md"
             >
                 <span class="meta" style="color: {color}">
                     <span class="badges inline-block"> </span>
@@ -84,6 +84,29 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         const $topToast = document.getElementById("top-toast");
         const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
 
+        const parseEmotes = (
+            message: string,
+            emotes: Map<string, string[]>,
+        ) => {
+            const emoteSet = Object.fromEntries(emotes);
+            const parts = [];
+            let lastIndex = 0;
+
+            for (const [key, value] of Object.entries(emoteSet)) {
+                const [start, end] = value[0].split("-").map(Number);
+                const emoteText = message.slice(start, end + 1);
+
+                const $emote = document.createElement("img");
+                $emote.classList.add("message-emote");
+                $emote.src = `https://static-cdn.jtvnw.net/emoticons/v2/${key}/default/dark/1.0`;
+
+                // Replace emote text with image HTML (All occurrences)
+                message = message.replaceAll(emoteText, $emote.outerHTML);
+            }
+
+            return message;
+        };
+
         const addMessage = ({
             displayName,
             message,
@@ -140,29 +163,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             // Parse emotes (Twurple)
             const emotes = context.emoteOffsets;
             if (emotes) {
-                const emoteSet = Object.fromEntries(emotes);
-                const parts = [];
-                let lastIndex = 0;
-
-                // Create a new message by replacing emotes with their corresponding images
-                let newMessage = message;
-
-                for (const [key, value] of Object.entries(emoteSet)) {
-                    const [start, end] = value[0].split("-").map(Number);
-                    const emoteText = message.slice(start, end + 1);
-
-                    const $emote = document.createElement("img");
-                    $emote.classList.add("message-emote");
-                    $emote.src = `https://static-cdn.jtvnw.net/emoticons/v2/${key}/default/dark/1.0`;
-
-                    // Replace emote text with image HTML (All occurrences)
-                    newMessage = newMessage.replaceAll(
-                        emoteText,
-                        $emote.outerHTML,
-                    );
-                }
-
-                $message!.innerHTML = newMessage;
+                $message!.innerHTML = parseEmotes(message, emotes);
             } else {
                 $message!.textContent = message;
             }
