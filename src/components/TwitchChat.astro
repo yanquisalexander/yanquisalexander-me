@@ -86,7 +86,6 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         };
 
         const { globalBadges, channelBadges } = await loadBadges();
-        await apiClient.chat.getChannelBadges(BROADCASTER_ID);
 
         chatClient.connect();
 
