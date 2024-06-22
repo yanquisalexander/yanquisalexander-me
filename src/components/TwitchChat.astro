@@ -177,6 +177,10 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 top: $chatList.scrollHeight,
                 behavior: "smooth",
             });
+
+            if (($chatList?.children.length ?? 0) > 100) {
+                $chatList?.removeChild($chatList?.children[0]);
+            }
         };
 
         const addToast = (toast: Toast) => {
