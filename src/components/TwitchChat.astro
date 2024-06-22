@@ -74,9 +74,19 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
 
         const apiClient = createApiClient({ authProvider });
 
-        const globalBadges = await apiClient.chat.getGlobalBadges();
-        const channelBadges =
-            await apiClient.chat.getChannelBadges(BROADCASTER_ID);
+        const loadBadges = async () => {
+            const globalBadges = await apiClient.chat.getGlobalBadges();
+            const channelBadges =
+                await apiClient.chat.getChannelBadges(BROADCASTER_ID);
+
+            console.log(`Loaded ${globalBadges.length} global badges`);
+            console.log(`Loaded ${channelBadges.length} channel badges`);
+
+            return { globalBadges, channelBadges };
+        };
+
+        const { globalBadges, channelBadges } = await loadBadges();
+        await apiClient.chat.getChannelBadges(BROADCASTER_ID);
 
         chatClient.connect();
 
