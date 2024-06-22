@@ -1,0 +1,188 @@
+---
+import TwitchLayout from "@/layouts/TwitchLayout.astro";
+---
+
+<TwitchLayout>
+    <div
+        id="twitch-chat"
+        class="min-h-screen flex flex-col justify-end inset-0 absolute items-end"
+    >
+    </div>
+
+    <template id="chatlist_item">
+        <div
+            data-message-id
+            class="px-4 py-2 bg-[#18181b] rounded-lg animate-fade-in-right mb-3 max-w-md"
+        >
+            <span class="meta" style="color: {color}">
+                <span class="badges inline-block"> </span>
+                <span class="name font-semibold"></span>
+            </span>
+
+            <p
+                class="message text-white text-normal whitespace-pre-wrap break-words"
+            >
+            </p>
+        </div>
+    </template>
+</TwitchLayout>
+
+<script>
+    import { ChatClient } from "@twurple/chat";
+    import {
+        createAuthProvider,
+        createApiClient,
+        BROADCASTER_ID,
+    } from "@/lib/Twitch";
+    import type { ChatMessage } from "node_modules/@twurple/chat/lib/ChatMessage";
+
+    const token = document
+        .querySelector("[data-token]")
+        ?.getAttribute("data-token");
+
+    if (!token) {
+        throw new Error("Twitch token not found");
+    }
+
+    const authProvider = createAuthProvider({
+        token,
+    });
+
+    const chatClient = new ChatClient({
+        authProvider,
+        channels: ["alexitoo_uy"],
+    });
+
+    const apiClient = createApiClient({ authProvider });
+
+    const globalBadges = await apiClient.chat.getGlobalBadges();
+    const channelBadges = await apiClient.chat.getChannelBadges(BROADCASTER_ID);
+
+    chatClient.connect();
+
+    const $chatList = document.getElementById("twitch-chat");
+
+    const addMessage = ({
+        displayName,
+        message,
+        context,
+    }: {
+        displayName: string;
+        message: string;
+        context: ChatMessage;
+    }) => {
+        const $template = document.getElementById(
+            "chatlist_item",
+        ) as HTMLTemplateElement;
+        const $clone = $template.content.cloneNode(true) as DocumentFragment;
+        const $message = $clone.querySelector(".message") as HTMLElement;
+        const $name = $clone.querySelector(".name");
+        const $badges = $clone.querySelector(".badges");
+        const $meta = $clone.querySelector(".meta") as HTMLElement;
+
+        $clone
+            .querySelector("[data-message-id]")
+            ?.setAttribute("data-message-id", context.id);
+
+        const { userInfo } = context;
+        console.log(context);
+
+        const color = userInfo.color || "#fff";
+
+        $name!.textContent = displayName;
+        $meta!.style.color = color;
+
+        const badges = Object.fromEntries(userInfo.badges);
+
+        for (const [key, value] of Object.entries(badges)) {
+            // Get badge (priority: channel > global)
+            const badge =
+                channelBadges.find((b) => b.id === key) ||
+                globalBadges.find((b) => b.id === key);
+
+            if (!badge) {
+                continue;
+            }
+
+            const $badge = document.createElement("img");
+            $badge.classList.add("chat-badge");
+            $badge.src = badge.versions
+                .find((v) => v.id === value)
+                ?.getImageUrl(1) as string;
+
+            $badges?.appendChild($badge);
+        }
+
+        // Parse emotes (Twurple)
+        const emotes = context.emoteOffsets;
+        if (emotes) {
+            const emoteSet = Object.fromEntries(emotes);
+            const parts = [];
+            let lastIndex = 0;
+
+            // Create a new message by replacing emotes with their corresponding images
+            let newMessage = message;
+
+            for (const [key, value] of Object.entries(emoteSet)) {
+                const [start, end] = value[0].split("-").map(Number);
+                const emoteText = message.slice(start, end + 1);
+
+                const $emote = document.createElement("img");
+                $emote.classList.add("message-emote");
+                $emote.src = `https://static-cdn.jtvnw.net/emoticons/v2/${key}/default/dark/1.0`;
+
+                // Replace emote text with image HTML (All occurrences)
+                newMessage = newMessage.replaceAll(emoteText, $emote.outerHTML);
+            }
+
+            $message!.innerHTML = newMessage;
+        } else {
+            $message!.textContent = message;
+        }
+
+        $message!.style.fontSize = "1rem";
+
+        $chatList?.appendChild($clone);
+
+        // Scroll to the bottom
+        $chatList?.scrollTo({
+            top: $chatList.scrollHeight,
+            behavior: "smooth",
+        });
+    };
+
+    chatClient.onMessage((channel, username, text, context) => {
+        console.log({ channel, username, text, context });
+        addMessage({
+            displayName: context.userInfo.displayName,
+            message: text,
+            context,
+        });
+    });
+
+    chatClient.onMessageRemove((channel, messageId) => {
+        const $message = document.querySelector(
+            `[data-message-id="${messageId}"] .message`,
+        );
+
+        if ($message) {
+            // replace with a message removed message
+            $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
+        }
+    });
+</script>
+
+<style is:inline>
+    .message-emote {
+        display: inline-block;
+        height: 28px;
+    }
+
+    .chat-badge {
+        height: 24px;
+        margin-bottom: 0.15rem;
+        margin-right: 0.3rem;
+        vertical-align: middle;
+        display: inline-block;
+    }
+</style>

@@ -1,0 +1,7 @@
+---
+import TwitchChat from "@/components/TwitchChat.astro";
+import { TWITCH_TOKEN } from "@/lib/Twitch";
+---
+
+<div class="hidden" data-token={TWITCH_TOKEN}></div>
+<TwitchChat />

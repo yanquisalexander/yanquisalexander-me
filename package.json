@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/db": "^0.11.6",
     "@astrojs/deno": "^5.0.1",
+    "@astrojs/mdx": "^3.1.1",
     "@astrojs/react": "^3.6.0",
     "@astrojs/rss": "^4.0.6",
     "@astrojs/sitemap": "^3.1.6",
@@ -23,6 +24,10 @@
     "@midudev/tailwind-animations": "^0.0.7",
     "@react-symbols/icons": "^1.2.5",
     "@twemoji/parser": "^15.1.1",
+    "@twurple/api": "^7.1.0",
+    "@twurple/auth": "^7.1.0",
+    "@twurple/chat": "^7.1.0",
+    "@twurple/pubsub": "^7.1.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "astro": "^4.10.3",

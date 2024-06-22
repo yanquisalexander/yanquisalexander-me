@@ -1,0 +1,22 @@
+<div class="code-block">
+    <slot />
+</div>
+
+<style>
+    .code-block {
+        position: relative;
+        padding-block: 16px;
+    }
+
+    .code-block:after {
+        background: url(/logo-javascript.png) no-repeat 100% 0;
+        content: "";
+        position: absolute;
+        right: 12px;
+        top: 24px;
+        width: 24px;
+        height: 24px;
+        background-size: cover;
+        border-radius: 4px;
+    }
+</style>
