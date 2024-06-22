@@ -335,13 +335,13 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
 
             const playWithStreamElements = () => {
                 const audio = new Audio(
-                    `hhttps://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
+                    `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
                 );
                 audio.play();
             };
 
-            const supportsNativeTTS = false;
-            //speechSynthesis && speechSynthesis.getVoices().length > 0;
+            const supportsNativeTTS =
+                speechSynthesis && speechSynthesis.getVoices().length > 0;
 
             if (ttsQueue.length === 0) {
                 if (!supportsNativeTTS) {
