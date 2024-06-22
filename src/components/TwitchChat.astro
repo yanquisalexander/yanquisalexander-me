@@ -58,6 +58,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             parseEmotes,
             createCommand,
         } from "@/lib/Twitch";
+        import { createPubSubClient } from "@/lib/Twitch";
 
         const toastQueue: Toast[] = [];
         const commands: Command[] = [];
@@ -79,6 +80,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         });
 
         const apiClient = createApiClient({ authProvider });
+        const pubSubClient = createPubSubClient({ authProvider });
 
         const { globalBadges, channelBadges } = await loadBadges({
             apiClient,
@@ -279,6 +281,12 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 duration: 10000,
                 backgroundColor,
             });
+        });
+
+        chatClient.onChatClear((channel) => {
+            if ($chatList) {
+                $chatList.innerHTML = "";
+            }
         });
 
         commands.push(
