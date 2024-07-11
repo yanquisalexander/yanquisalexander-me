@@ -1,5 +1,7 @@
 ---
+import { TWITCH_TOKEN } from "@/lib/Twitch";
 import "@fontsource-variable/jost";
+import "@fontsource/cascadia-code";
 ---
 
 <!doctype html>
@@ -8,13 +10,20 @@ import "@fontsource-variable/jost";
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Twitch</title>
-    </head>
+    </head><div class="hidden" data-token={TWITCH_TOKEN}></div>
+
     <body>
         <slot />
     </body>
     <style>
         html {
-            font-family: "Jost", sans-serif !important;
+            font-family: "Cascadia Code", sans-serif !important;
+        }
+
+        .with-ligatures {
+            font-variant-ligatures: common-ligatures;
         }
     </style>
+
+
 </html>

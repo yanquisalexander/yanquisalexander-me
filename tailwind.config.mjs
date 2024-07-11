@@ -7,6 +7,7 @@ export default {
 	theme: {
 		extend: {
 			fontFamily: {
+				cascadia: ['Cascadia Code', 'monospace'],
 			},
 			colors: {
 				primary: "var(--color-primary)",
@@ -43,5 +44,6 @@ export default {
 			addVariant("any-hover", "@media (any-hover: hover) { &:hover }")
 			addVariant("mobile", "@media (any-hover: none) { & }")
 		},
+
 	],
 }

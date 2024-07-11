@@ -73,3 +73,15 @@ export const parseEmotes = (
 
     return message;
 };
+
+export const extractTokenFromHead = () => {
+    const token = document
+        .querySelector("[data-token]")
+        ?.getAttribute("data-token");
+
+    if (!token) {
+        throw new Error("Twitch token not found");
+    }
+
+    return token;
+}

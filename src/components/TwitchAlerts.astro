@@ -1,0 +1,197 @@
+<div id="twitch-alerts" class="fixed inset-0 flex items-center bg-white">
+    <div
+        class="bg-black/80 rounded-md text-white h-screen w-full hidden"
+        id="alert-container"
+    >
+        <section class="flex flex-row items-center p-4 gap-x-6">
+            <div class="alert__image">
+                <img
+                    src="/images/alerts/cheer.png"
+                    alt="Cheer"
+                    class="hidden w-36 object-cover"
+                />
+            </div>
+            <div class="alert__text">
+                <h2 class="alert__text__title text-3xl hidden">Cheer</h2>
+                <p class="alert__text__message hidden">
+                    Thank you for the cheer!
+                </p>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    import {
+        extractTokenFromHead,
+        createApiClient,
+        createPubSubClient,
+        createAuthProvider,
+        BROADCASTER_ID,
+    } from "@/lib/Twitch";
+    import {
+        type Alert,
+        ALERTS,
+        type AlertVariant,
+    } from "@/lib/TwitchAlertVariants.ts";
+    import confetti from "canvas-confetti";
+
+    const token = extractTokenFromHead();
+
+    const authProvider = createAuthProvider({ token });
+
+    const apiClient = createApiClient({ authProvider });
+    const pubSubClient = createPubSubClient({ authProvider });
+
+    const TIME_BETWEEN_ALERTS = 5000;
+
+    const AlertsQueue: Alert[] = [];
+
+    const $alertContainer = document.getElementById("alert-container");
+    const $alertImage = document.querySelector(
+        ".alert__image img",
+    ) as HTMLImageElement;
+    const $alertTitle = document.querySelector(
+        ".alert__text__title",
+    ) as HTMLHeadingElement;
+    const $alertMessage = document.querySelector(
+        ".alert__text__message",
+    ) as HTMLParagraphElement;
+
+    const addAlert = (
+        type: string,
+        variables: Record<string, string | number>,
+    ) => {
+        const alert = ALERTS[type];
+        if (!alert) {
+            console.error(`Alert type ${type} not defined in ALERTS`);
+            return;
+        }
+
+        AlertsQueue.push({
+            type: type as Alert["type"],
+            variants: alert.variants,
+            variables: variables,
+        });
+
+        if (AlertsQueue.length === 1) {
+            processAlertQueue();
+        }
+    };
+
+    const processAlertQueue = () => {
+        const alert = AlertsQueue.shift();
+        if (!alert) return;
+
+        const { type, variants, variables } = alert;
+
+        const applicableVariants = variants.filter((variant) => {
+            if (type === "cheer" && variant.minBits) {
+                return variant.minBits <= (variables?.bits ?? 0);
+            }
+            return true;
+        });
+
+        const variant: AlertVariant | null = applicableVariants.reduce(
+            (highest: AlertVariant | null, current: AlertVariant) => {
+                if (
+                    !highest ||
+                    (current.minBits ?? 0) > (highest.minBits ?? 0)
+                ) {
+                    return current;
+                }
+                return highest;
+            },
+            null,
+        );
+
+        if (!variant) {
+            console.error("No variant found for alert", alert);
+            return;
+        }
+
+        const replaceVariables = (template: string) => {
+            if (!variables) return template;
+            return Object.entries(variables).reduce(
+                (str, [key, value]) =>
+                    str.replace(
+                        new RegExp(`\\$${key}`, "g"),
+                        `<span class="text-blue-500">${value}</span>`,
+                    ),
+                template,
+            );
+        };
+
+        const $alertImage = document.querySelector(
+            ".alert__image img",
+        ) as HTMLImageElement;
+        const $alertTitle = document.querySelector(
+            ".alert__text__title",
+        ) as HTMLHeadingElement;
+        const $alertMessage = document.querySelector(
+            ".alert__text__message",
+        ) as HTMLParagraphElement;
+
+        if (variant.audioSrc) {
+            const audio = new Audio(variant.audioSrc);
+            audio.volume = variant.volume ?? 1;
+            audio.play();
+        }
+
+        if (variant.image) {
+            $alertImage.src = variant.image;
+            $alertImage.classList.remove("hidden");
+        } else {
+            $alertImage.classList.add("hidden");
+        }
+
+        if (variant.messageTemplate) {
+            $alertMessage.innerHTML = replaceVariables(variant.messageTemplate);
+            $alertMessage.classList.remove("hidden");
+        } else {
+            $alertMessage.classList.add("hidden");
+        }
+
+        if (variant.titleTemplate) {
+            $alertTitle.innerHTML = replaceVariables(variant.titleTemplate);
+            $alertTitle.classList.remove("hidden");
+        } else {
+            $alertTitle.classList.add("hidden");
+        }
+
+        const $alertContainer = document.getElementById("alert-container");
+        $alertContainer?.classList.remove("hidden");
+        $alertContainer?.classList.add("animate-fade-in-up");
+
+        if (variant.effect === "confetti") {
+            confetti({
+                particleCount: 100,
+            });
+        }
+
+        setTimeout(() => {
+            $alertContainer?.classList.remove("animate-fade-in-up");
+            $alertContainer?.classList.add("animate-fade-out-down");
+        }, variant.duration ?? 5000);
+
+        setTimeout(
+            () => {
+                $alertContainer?.classList.add("hidden");
+                $alertContainer?.classList.remove("animate-fade-out-down");
+                processAlertQueue();
+            },
+            (variant.duration ?? 5000) + TIME_BETWEEN_ALERTS,
+        );
+    };
+
+    // Simulación inicial de un evento de cheer
+    const simulateCheer = () => {
+        addAlert("cheer", {
+            username: "username",
+            bits: 222,
+        });
+    };
+
+    // Llama a la función para simular un cheer
+    simulateCheer();
+</script>

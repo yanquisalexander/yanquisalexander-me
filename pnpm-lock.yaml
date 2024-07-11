@@ -38,6 +38,9 @@ importers:
       '@fontsource-variable/jost':
         specifier: ^5.0.18
         version: 5.0.19
+      '@fontsource/cascadia-code':
+        specifier: ^4.2.1
+        version: 4.2.1
       '@midudev/tailwind-animations':
         specifier: ^0.0.7
         version: 0.0.7(tailwindcss@3.4.3)
@@ -709,6 +712,10 @@ packages:
 
   '@fontsource-variable/jost@5.0.19':
     resolution: {integrity: sha512-+uQ2f14HeqlRWbAH3shJoVUxogX5EbQwQm9uccYjyaiHVeHzrAYlxOdvZT9jB8XgybxpeCf/mtSr4Qwuzl6VYA==}
+
+  '@fontsource/cascadia-code@4.2.1':
+    resolution: {integrity: sha512-Nb6RyI7dxe3jS7Ap0fl7/GQ9GksqDPNNEMZD+bvc+m5lCyVPvFtAYbXo9uojvLnIKhYCEFNGXlKCp2Vmn9Tx5Q==}
+    deprecated: Deprecated
 
   '@img/sharp-darwin-arm64@0.33.3':
     resolution: {integrity: sha512-FaNiGX1MrOuJ3hxuNzWgsT/mg5OHG/Izh59WW2mk1UwYHUwtfbhk5QNKYZgxf0pLOhx9ctGiGa2OykD71vOnSw==}
@@ -3981,6 +3988,8 @@ snapshots:
     optional: true
 
   '@fontsource-variable/jost@5.0.19': {}
+
+  '@fontsource/cascadia-code@4.2.1': {}
 
   '@img/sharp-darwin-arm64@0.33.3':
     optionalDependencies:

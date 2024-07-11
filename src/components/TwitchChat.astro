@@ -2,384 +2,372 @@
 import TwitchLayout from "@/layouts/TwitchLayout.astro";
 ---
 
-<TwitchLayout>
-    <div
-        id="twitch-chat"
-        class="min-h-screen flex flex-col justify-end inset-0 absolute items-end"
-    >
-    </div>
+<div
+    id="twitch-chat"
+    class="min-h-screen flex flex-col justify-end inset-0 absolute items-end"
+>
+</div>
 
-    <div
-        id="top-toast"
-        class="hidden fixed top-4 inset-x-0 max-w-md mx-auto bg-[#6441a5] rounded-md"
-    >
-        <h2 class="text-white text-center text-lg font-semibold">
-            Bienvenidos
-        </h2>
-        <p class="text-white text-center text-sm">Este es el chat de Twitch</p>
-        <!-- Reversed progressbar, because has a time in seconds (use requestAnimationFrame)
+<div
+    id="top-toast"
+    class="hidden fixed top-4 inset-x-0 max-w-md mx-auto bg-[#6441a5] rounded-md"
+>
+    <h2 class="text-white text-center text-lg font-semibold">Bienvenidos</h2>
+    <p class="text-white text-center text-sm">Este es el chat de Twitch</p>
+    <!-- Reversed progressbar, because has a time in seconds (use requestAnimationFrame)
         On finish, hide the toast with animate-fade-out-up -->
 
-        <template id="chatlist_item">
-            <div
-                data-message-id
-                class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-1 w-full"
+    <template id="chatlist_item">
+        <div
+            data-message-id
+            class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-1 w-full"
+        >
+            <span class="meta" style="color: {color}">
+                <span class="badges inline-block"> </span>
+                <span class="name font-semibold"></span>
+            </span>
+
+            <p
+                class="message text-white text-normal whitespace-pre-wrap break-words"
             >
-                <span class="meta" style="color: {color}">
-                    <span class="badges inline-block"> </span>
-                    <span class="name font-semibold"></span>
-                </span>
+            </p>
+        </div>
+    </template>
+</div>
 
-                <p
-                    class="message text-white text-normal whitespace-pre-wrap break-words"
-                >
-                </p>
-            </div>
-        </template>
-    </div>
+<script>
+    import confetti from "canvas-confetti";
+    interface Toast {
+        title?: string;
+        message: string;
+        duration: number;
+        backgroundColor?: string;
+        type?: "sub-gifted" | "community-gifted" | "bits" | "raid";
+    }
 
-    <script>
-        import confetti from "canvas-confetti";
-        interface Toast {
-            title?: string;
-            message: string;
-            duration: number;
-            backgroundColor?: string;
-            type?: "sub-gifted" | "community-gifted" | "bits" | "raid";
+    interface TTSQueue {
+        message: string;
+        lang?: string;
+    }
+
+    import { ChatClient } from "@twurple/chat";
+    import {
+        type Command,
+        createAuthProvider,
+        createApiClient,
+        BROADCASTER_ID,
+        loadBadges,
+        parseEmotes,
+        createCommand,
+        extractTokenFromHead,
+    } from "@/lib/Twitch";
+    import { createPubSubClient } from "@/lib/Twitch";
+
+    const toastQueue: Toast[] = [];
+    const commands: Command[] = [];
+    const ttsQueue: TTSQueue[] = [];
+    const token = extractTokenFromHead();
+
+    const authProvider = createAuthProvider({
+        token,
+    });
+    888;
+
+    const chatClient = new ChatClient({
+        authProvider,
+        channels: ["alexitoo_uy"],
+    });
+
+    const apiClient = createApiClient({ authProvider });
+
+    const { globalBadges, channelBadges } = await loadBadges({
+        apiClient,
+        broadcasterId: BROADCASTER_ID,
+    });
+
+    chatClient.connect();
+
+    const TIME_BETWEEN_TOASTS = 2500;
+    const TIME_BETWEEN_TTS = 5000;
+    const $chatList = document.getElementById("twitch-chat");
+    const $topToast = document.getElementById("top-toast");
+    const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
+
+    const addMessage = ({
+        displayName,
+        message,
+        context,
+    }: {
+        displayName: string;
+        message: string;
+        context: any;
+    }) => {
+        const $template = document.getElementById(
+            "chatlist_item",
+        ) as HTMLTemplateElement;
+        const $clone = $template.content.cloneNode(true) as DocumentFragment;
+        const $message = $clone.querySelector(".message") as HTMLElement;
+        const $name = $clone.querySelector(".name");
+        const $badges = $clone.querySelector(".badges");
+        const $meta = $clone.querySelector(".meta") as HTMLElement;
+
+        $clone
+            .querySelector("[data-message-id]")
+            ?.setAttribute("data-message-id", context.id);
+
+        const { userInfo } = context;
+
+        const color = userInfo.color || "#fff";
+
+        $name!.textContent = displayName;
+        $meta!.style.color = color;
+
+        const badges = Object.fromEntries(userInfo.badges);
+
+        for (const [key, value] of Object.entries(badges)) {
+            // Get badge (priority: channel > global)
+            const badge =
+                channelBadges.find((b) => b.id === key) ||
+                globalBadges.find((b) => b.id === key);
+
+            if (!badge) {
+                continue;
+            }
+
+            const $badge = document.createElement("img");
+            $badge.classList.add("chat-badge");
+            $badge.src = badge.versions
+                .find((v) => v.id === value)
+                ?.getImageUrl(1) as string;
+
+            $badges?.appendChild($badge);
         }
 
-        interface TTSQueue {
-            message: string;
-            lang?: string;
+        // Replace the !speak text with an image (Keep the rest intact because later we will parse emotes)
+        if (message.startsWith("!speak")) {
+            const $horn = document.createElement("img");
+            $horn.src =
+                "https://cdn-icons-png.flaticon.com/512/1711/1711789.png";
+            $horn.classList.add("message-emote");
+
+            message = message.replace("!speak", $horn.outerHTML);
         }
 
-        import { ChatClient } from "@twurple/chat";
-        import {
-            type Command,
-            createAuthProvider,
-            createApiClient,
-            BROADCASTER_ID,
-            loadBadges,
-            parseEmotes,
-            createCommand,
-        } from "@/lib/Twitch";
-        import { createPubSubClient } from "@/lib/Twitch";
+        let messageContent = message;
 
-        const toastQueue: Toast[] = [];
-        const commands: Command[] = [];
-        const ttsQueue: TTSQueue[] = [];
-        const token = document
-            .querySelector("[data-token]")
-            ?.getAttribute("data-token");
-
-        if (!token) {
-            throw new Error("Twitch token not found");
+        // Parse emotes (Twurple)
+        const emotes = context.emoteOffsets;
+        if (emotes) {
+            messageContent = parseEmotes(message, emotes);
         }
 
-        const authProvider = createAuthProvider({
-            token,
-        });
-        888;
+        $message!.innerHTML = messageContent;
 
-        const chatClient = new ChatClient({
-            authProvider,
-            channels: ["alexitoo_uy"],
-        });
+        $message!.style.fontSize = "1rem";
 
-        const apiClient = createApiClient({ authProvider });
-        const pubSubClient = createPubSubClient({ authProvider });
+        $chatList?.appendChild($clone);
 
-        const { globalBadges, channelBadges } = await loadBadges({
-            apiClient,
-            broadcasterId: BROADCASTER_ID,
+        // Scroll to the bottom
+        $chatList?.scrollTo({
+            top: $chatList.scrollHeight,
+            behavior: "smooth",
         });
 
-        chatClient.connect();
+        if (($chatList?.children.length ?? 0) > 100) {
+            $chatList?.removeChild($chatList?.children[0]);
+        }
+    };
 
-        const TIME_BETWEEN_TOASTS = 2500;
-        const TIME_BETWEEN_TTS = 5000;
-        const $chatList = document.getElementById("twitch-chat");
-        const $topToast = document.getElementById("top-toast");
-        const $originalToast = $topToast?.cloneNode(true) as HTMLElement;
+    const addToast = (toast: Toast) => {
+        toastQueue.push(toast);
 
-        const addMessage = ({
-            displayName,
-            message,
-            context,
-        }: {
-            displayName: string;
-            message: string;
-            context: any;
-        }) => {
-            const $template = document.getElementById(
-                "chatlist_item",
-            ) as HTMLTemplateElement;
-            const $clone = $template.content.cloneNode(
-                true,
-            ) as DocumentFragment;
-            const $message = $clone.querySelector(".message") as HTMLElement;
-            const $name = $clone.querySelector(".name");
-            const $badges = $clone.querySelector(".badges");
-            const $meta = $clone.querySelector(".meta") as HTMLElement;
+        if (toastQueue.length === 1) {
+            showNextToast();
+        }
+    };
 
-            $clone
-                .querySelector("[data-message-id]")
-                ?.setAttribute("data-message-id", context.id);
+    const showNextToast = () => {
+        const toast = toastQueue[0];
 
-            const { userInfo } = context;
+        if (!toast) {
+            return;
+        }
 
-            const color = userInfo.color || "#fff";
+        if (!$topToast) {
+            return;
+        }
 
-            $name!.textContent = displayName;
-            $meta!.style.color = color;
+        // replace toast h2 and p with toast.title and toast.message
+        $topToast.querySelector("h2")!.textContent = toast.title || "";
+        $topToast.querySelector("p")!.textContent = toast.message;
 
-            const badges = Object.fromEntries(userInfo.badges);
+        // Add toast type class
+        if (toast.type) {
+            $topToast.classList.add(`bg-${toast.type}`);
+        }
 
-            for (const [key, value] of Object.entries(badges)) {
-                // Get badge (priority: channel > global)
-                const badge =
-                    channelBadges.find((b) => b.id === key) ||
-                    globalBadges.find((b) => b.id === key);
+        if (toast.backgroundColor) {
+            // Reset the class list, then add the background color
+            $topToast.className = $originalToast.className;
+            $topToast.classList.add(...toast.backgroundColor.split(" "));
+        }
 
-                if (!badge) {
-                    continue;
-                }
+        // Show toast
+        $topToast.classList.remove("hidden");
+        $topToast.classList.add("animate-fade-in-up");
 
-                const $badge = document.createElement("img");
-                $badge.classList.add("chat-badge");
-                $badge.src = badge.versions
-                    .find((v) => v.id === value)
-                    ?.getImageUrl(1) as string;
-
-                $badges?.appendChild($badge);
-            }
-
-            // Replace the !speak text with an image (Keep the rest intact because later we will parse emotes)
-            if (message.startsWith("!speak")) {
-                const $horn = document.createElement("img");
-                $horn.src =
-                    "https://cdn-icons-png.flaticon.com/512/1711/1711789.png";
-                $horn.classList.add("message-emote");
-
-                message = message.replace("!speak", $horn.outerHTML);
-            }
-
-            let messageContent = message;
-
-            // Parse emotes (Twurple)
-            const emotes = context.emoteOffsets;
-            if (emotes) {
-                messageContent = parseEmotes(message, emotes);
-            }
-
-            $message!.innerHTML = messageContent;
-
-            $message!.style.fontSize = "1rem";
-
-            $chatList?.appendChild($clone);
-
-            // Scroll to the bottom
-            $chatList?.scrollTo({
-                top: $chatList.scrollHeight,
-                behavior: "smooth",
-            });
-
-            if (($chatList?.children.length ?? 0) > 100) {
-                $chatList?.removeChild($chatList?.children[0]);
-            }
-        };
-
-        const addToast = (toast: Toast) => {
-            toastQueue.push(toast);
-
-            if (toastQueue.length === 1) {
-                showNextToast();
-            }
-        };
-
-        const showNextToast = () => {
-            const toast = toastQueue[0];
-
-            if (!toast) {
-                return;
-            }
-
-            if (!$topToast) {
-                return;
-            }
-
-            // replace toast h2 and p with toast.title and toast.message
-            $topToast.querySelector("h2")!.textContent = toast.title || "";
-            $topToast.querySelector("p")!.textContent = toast.message;
-
-            // Add toast type class
-            if (toast.type) {
-                $topToast.classList.add(`bg-${toast.type}`);
-            }
-
-            if (toast.backgroundColor) {
-                // Reset the class list, then add the background color
-                $topToast.className = $originalToast.className;
-                $topToast.classList.add(...toast.backgroundColor.split(" "));
-            }
-
-            // Show toast
-            $topToast.classList.remove("hidden");
-            $topToast.classList.add("animate-fade-in-up");
+        setTimeout(() => {
+            $topToast.classList.remove("animate-fade-in-up");
+            $topToast.classList.add("animate-fade-out-up");
 
             setTimeout(() => {
-                $topToast.classList.remove("animate-fade-in-up");
-                $topToast.classList.add("animate-fade-out-up");
+                $topToast.classList.add("hidden");
+                $topToast.classList.remove("animate-fade-out-up");
 
-                setTimeout(() => {
-                    $topToast.classList.add("hidden");
-                    $topToast.classList.remove("animate-fade-out-up");
-
-                    // Remove toast type class
-                    if (toast.type) {
-                        $topToast.classList.remove(`bg-${toast.type}`);
-                    }
-
-                    // Remove the toast from the queue
-                    toastQueue.shift();
-
-                    // Show the next toast
-                    showNextToast();
-                }, TIME_BETWEEN_TOASTS);
-            }, toast.duration);
-        };
-
-        const isCommand = (text: string) => {
-            return text.startsWith("!");
-        };
-
-        chatClient.onMessage((channel, username, text, context) => {
-            if (isCommand(text)) {
-                const commandName = text.split(" ")[0].replace("!", "");
-                const command = commands.find((c) => c.command === commandName);
-
-                console.log("Command found:", command);
-
-                if (command && command.execute) {
-                    command.execute(text, username);
+                // Remove toast type class
+                if (toast.type) {
+                    $topToast.classList.remove(`bg-${toast.type}`);
                 }
-            }
-            addMessage({
-                displayName: context.userInfo.displayName,
-                message: text,
-                context,
-            });
-        });
 
-        chatClient.onMessageRemove((channel, messageId) => {
-            const $message = document.querySelector(
-                `[data-message-id="${messageId}"] .message`,
+                // Remove the toast from the queue
+                toastQueue.shift();
+
+                // Show the next toast
+                showNextToast();
+            }, TIME_BETWEEN_TOASTS);
+        }, toast.duration);
+    };
+
+    const isCommand = (text: string) => {
+        return text.startsWith("!");
+    };
+
+    chatClient.onMessage((channel, username, text, context) => {
+        if (isCommand(text)) {
+            const commandName = text.split(" ")[0].replace("!", "");
+            const command = commands.find((c) => c.command === commandName);
+
+            console.log("Command found:", command);
+
+            if (command && command.execute) {
+                command.execute(text, username);
+            }
+        }
+        addMessage({
+            displayName: context.userInfo.displayName,
+            message: text,
+            context,
+        });
+    });
+
+    chatClient.onMessageRemove((channel, messageId) => {
+        const $message = document.querySelector(
+            `[data-message-id="${messageId}"] .message`,
+        );
+
+        if ($message) {
+            // replace with a message removed message
+            $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
+        }
+    });
+
+    chatClient.onAnnouncement((channel, user, info, data) => {
+        let backgroundColor;
+        //Colors are "PRIMARY", "BLUE", "GREEN", "ORANGE" and "PURPLE".
+
+        switch (info.color) {
+            case "PURPLE":
+                backgroundColor =
+                    "bg-gradient-to-b from-violet-600 to-blue-500";
+                break;
+            default:
+                backgroundColor = "";
+                break;
+        }
+        addToast({
+            title: "Anuncio",
+            message: data.text || "",
+            duration: 10000,
+            backgroundColor,
+        });
+    });
+
+    chatClient.onChatClear((channel) => {
+        if ($chatList) {
+            $chatList.innerHTML = "";
+        }
+    });
+
+    commands.push(
+        createCommand({
+            command: "confetti",
+            execute: () => {
+                confetti({
+                    particleCount: 100,
+                });
+            },
+        }),
+    );
+
+    commands.push(
+        createCommand({
+            command: "speak",
+            execute: (text) => {
+                const message = text.split(" ").slice(1).join(" ");
+                ttsQueue.push({ message });
+            },
+        }),
+    );
+
+    const speak = (text: string, lang = "es-UY") => {
+        // If the queue is empty, speak the message
+
+        const playWithStreamElements = () => {
+            const audio = new Audio(
+                `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
             );
-
-            if ($message) {
-                // replace with a message removed message
-                $message.innerHTML = `<p class="text-white opacity-80 italic">Mensaje eliminado por un moderador</p>`;
-            }
-        });
-
-        chatClient.onAnnouncement((channel, user, info, data) => {
-            let backgroundColor;
-            //Colors are "PRIMARY", "BLUE", "GREEN", "ORANGE" and "PURPLE".
-
-            switch (info.color) {
-                case "PURPLE":
-                    backgroundColor =
-                        "bg-gradient-to-b from-violet-600 to-blue-500";
-                    break;
-                default:
-                    backgroundColor = "";
-                    break;
-            }
-            addToast({
-                title: "Anuncio",
-                message: data.text || "",
-                duration: 10000,
-                backgroundColor,
-            });
-        });
-
-        chatClient.onChatClear((channel) => {
-            if ($chatList) {
-                $chatList.innerHTML = "";
-            }
-        });
-
-        commands.push(
-            createCommand({
-                command: "confetti",
-                execute: () => {
-                    confetti({
-                        particleCount: 100,
-                    });
-                },
-            }),
-        );
-
-        commands.push(
-            createCommand({
-                command: "speak",
-                execute: (text) => {
-                    const message = text.split(" ").slice(1).join(" ");
-                    ttsQueue.push({ message });
-                },
-            }),
-        );
-
-        const speak = (text: string, lang = "es-UY") => {
-            // If the queue is empty, speak the message
-
-            const playWithStreamElements = () => {
-                const audio = new Audio(
-                    `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
-                );
-                audio.volume = 0.5;
-                audio.play();
-            };
-
-            const supportsNativeTTS =
-                speechSynthesis && speechSynthesis.getVoices().length > 0;
-
-            if (ttsQueue.length === 0) {
-                if (!supportsNativeTTS) {
-                    playWithStreamElements();
-                    return;
-                }
-
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang;
-                speechSynthesis.speak(utterance);
-            } else {
-                // If the queue is not empty, add the message to the queue
-                ttsQueue.push({ message: text });
-            }
+            audio.volume = 0.5;
+            audio.play();
         };
 
-        setInterval(() => {
-            const tts = ttsQueue.shift();
+        const supportsNativeTTS =
+            speechSynthesis && speechSynthesis.getVoices().length > 0;
 
-            if (tts) {
-                speak(tts.message);
+        if (ttsQueue.length === 0) {
+            if (!supportsNativeTTS) {
+                playWithStreamElements();
+                return;
             }
-        }, TIME_BETWEEN_TTS);
-    </script>
 
-    <style is:inline>
-        .message-emote {
-            display: inline-block;
-            height: 28px;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            speechSynthesis.speak(utterance);
+        } else {
+            // If the queue is not empty, add the message to the queue
+            ttsQueue.push({ message: text });
         }
+    };
 
-        .chat-badge {
-            height: 24px;
-            margin-bottom: 0.15rem;
-            margin-right: 0.3rem;
-            vertical-align: middle;
-            display: inline-block;
+    setInterval(() => {
+        const tts = ttsQueue.shift();
+
+        if (tts) {
+            speak(tts.message);
         }
-    </style>
-</TwitchLayout>
+    }, TIME_BETWEEN_TTS);
+</script>
+
+<style is:inline>
+    .message-emote {
+        display: inline-block;
+        height: 28px;
+    }
+
+    .chat-badge {
+        height: 24px;
+        margin-bottom: 0.15rem;
+        margin-right: 0.3rem;
+        vertical-align: middle;
+        display: inline-block;
+    }
+</style>
