@@ -34,31 +34,27 @@ export const ALERTS: Record<string, Alert> = {
             {
                 image: "/twitch-assets/bits.gif",
                 minBits: 1,
-                messageTemplate: "Thank you for the cheer, $username!",
+                messageTemplate: `newCheering("$username", $bits)\n.then(() => "$message")`,
                 titleTemplate: "Gracias $username",
-                duration: 9000,
+                duration: 900000,
                 effect: "confetti",
                 audioSrc: "https://www.myinstants.com/media/sounds/twitch-bits-donation-sound-effect-sfx.mp3",
             },
+           
+        ],
+    },
+    follow: {
+        variants: [
             {
-                image: "/twitch-assets/bits.gif",
-                minBits: 50,
-                messageTemplate: "Thank you for the cheer, $username!",
-                titleTemplate: "Gracias $username",
-                duration: 9000,
+                image: "/twitch-assets/follow.gif",
+                messageTemplate: `newFollower("$username")\n.then(() => "Bienvenido a la familia 💜"`,
+                titleTemplate: "$username se ha unido",
+                duration: 900000,
                 effect: "confetti",
-                audioSrc: "https://www.myinstants.com/media/sounds/twitch-bits-donation-sound-effect-sfx.mp3",
-            },
-            {
-                image: "/twitch-assets/bits.gif",
-                minBits: 100,
-                messageTemplate: "TAMOS LOCOS? $username GRACIAS POR LOS $bits BITS",
-                titleTemplate: "Gracias $username",
-                duration: 9000,
-                effect: "confetti",
-                audioSrc: "https://www.myinstants.com/media/sounds/twitch-bits-donation-sound-effect-sfx.mp3",
+                audioSrc: "https://www.myinstants.com/media/sounds/twitch-follower-alert-sound-effect.mp3",
             },
         ],
     },
+
     // Agrega otros tipos como "follow" o "sub" según sea necesario
 };

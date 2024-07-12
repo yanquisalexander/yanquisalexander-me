@@ -1,27 +1,19 @@
-<div id="twitch-alerts" class="fixed inset-0 flex items-center bg-white">
-    <div
-        class="bg-black/80 rounded-md text-white h-screen w-full hidden"
-        id="alert-container"
-    >
-        <section class="flex flex-row items-center p-4 gap-x-6">
-            <div class="alert__image">
-                <img
-                    src="/images/alerts/cheer.png"
-                    alt="Cheer"
-                    class="hidden w-36 object-cover"
-                />
-            </div>
-            <div class="alert__text">
-                <h2 class="alert__text__title text-3xl hidden">Cheer</h2>
-                <p class="alert__text__message hidden">
-                    Thank you for the cheer!
-                </p>
-            </div>
-        </section>
+---
+import "@speed-highlight/core/themes/dark.css";
+---
+
+<div id="twitch-alerts" class="fixed inset-0 flex items-center">
+    <div class="text-white h-screen w-full hidden" id="alert-container">
+        <div class="alert__text">
+            <code
+                class="shj-lang-js alert__text__message hidden !py-4 !px-4 !font-cascadia break-words whitespace-pre-wrap"
+            ></code>
+        </div>
     </div>
 </div>
 
 <script>
+    import { highlightAll } from "@speed-highlight/core";
     import {
         extractTokenFromHead,
         createApiClient,
@@ -48,12 +40,6 @@
     const AlertsQueue: Alert[] = [];
 
     const $alertContainer = document.getElementById("alert-container");
-    const $alertImage = document.querySelector(
-        ".alert__image img",
-    ) as HTMLImageElement;
-    const $alertTitle = document.querySelector(
-        ".alert__text__title",
-    ) as HTMLHeadingElement;
     const $alertMessage = document.querySelector(
         ".alert__text__message",
     ) as HTMLParagraphElement;
@@ -79,7 +65,7 @@
         }
     };
 
-    const processAlertQueue = () => {
+    const processAlertQueue = async () => {
         const alert = AlertsQueue.shift();
         if (!alert) return;
 
@@ -113,21 +99,23 @@
         const replaceVariables = (template: string) => {
             if (!variables) return template;
             return Object.entries(variables).reduce(
-                (str, [key, value]) =>
-                    str.replace(
+                (str: string, [key, value]) => {
+                    // Si key es message, poner dentro de un párrafo
+                    if (key === "message") {
+                        return str.replace(
+                            new RegExp(`\\$${key}`, "g"),
+                            `<p>${value.toString()}</p>`,
+                        );
+                    }
+                    return str.replace(
                         new RegExp(`\\$${key}`, "g"),
-                        `<span class="text-blue-500">${value}</span>`,
-                    ),
+                        value.toString(),
+                    );
+                },
                 template,
             );
         };
 
-        const $alertImage = document.querySelector(
-            ".alert__image img",
-        ) as HTMLImageElement;
-        const $alertTitle = document.querySelector(
-            ".alert__text__title",
-        ) as HTMLHeadingElement;
         const $alertMessage = document.querySelector(
             ".alert__text__message",
         ) as HTMLParagraphElement;
@@ -138,13 +126,6 @@
             audio.play();
         }
 
-        if (variant.image) {
-            $alertImage.src = variant.image;
-            $alertImage.classList.remove("hidden");
-        } else {
-            $alertImage.classList.add("hidden");
-        }
-
         if (variant.messageTemplate) {
             $alertMessage.innerHTML = replaceVariables(variant.messageTemplate);
             $alertMessage.classList.remove("hidden");
@@ -152,12 +133,9 @@
             $alertMessage.classList.add("hidden");
         }
 
-        if (variant.titleTemplate) {
-            $alertTitle.innerHTML = replaceVariables(variant.titleTemplate);
-            $alertTitle.classList.remove("hidden");
-        } else {
-            $alertTitle.classList.add("hidden");
-        }
+        await highlightAll({
+            hideLineNumbers: false,
+        });
 
         const $alertContainer = document.getElementById("alert-container");
         $alertContainer?.classList.remove("hidden");
@@ -189,6 +167,7 @@
         addAlert("cheer", {
             username: "username",
             bits: 222,
+            message: "Holaaaa, estos son 222 bits de prueba",
         });
     };
 

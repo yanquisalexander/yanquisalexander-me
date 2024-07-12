@@ -6,6 +6,7 @@ import vercel from "@astrojs/vercel/serverless";
 import deno from "@astrojs/deno";
 import db from "@astrojs/db";
 import react from "@astrojs/react";
+import dynamicImport from 'vite-plugin-dynamic-import';
 
 import mdx from "@astrojs/mdx";
 
@@ -20,6 +21,14 @@ export default defineConfig({
       enabled: true
     }
   }),
+  plugins: [
+    dynamicImport({
+      filter(id) {
+        if (id.includes("@speed-highlight/core"))
+          return true;
+      }
+    })
+  ],
   markdown: {
     shikiConfig: {
       theme: 'synthwave-84',

@@ -24,6 +24,7 @@
     "@fontsource/cascadia-code": "^4.2.1",
     "@midudev/tailwind-animations": "^0.0.7",
     "@react-symbols/icons": "^1.2.5",
+    "@speed-highlight/core": "^1.2.6",
     "@twemoji/parser": "^15.1.1",
     "@twurple/api": "^7.1.0",
     "@twurple/auth": "^7.1.0",
@@ -43,6 +44,7 @@
     "tailwindcss-animated": "^1.0.1"
   },
   "devDependencies": {
-    "@types/canvas-confetti": "^1.6.4"
+    "@types/canvas-confetti": "^1.6.4",
+    "vite-plugin-dynamic-import": "^1.5.0"
   }
 }
