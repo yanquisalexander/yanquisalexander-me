@@ -16,36 +16,39 @@ import "@speed-highlight/core/themes/dark.css";
     import { highlightAll } from "@speed-highlight/core";
     import {
         extractTokenFromHead,
+        extractSocketTokenFromHead,
         createApiClient,
         createPubSubClient,
         createAuthProvider,
+        createStreamLabsSocket,
         BROADCASTER_ID,
     } from "@/lib/Twitch";
     import {
-        type Alert,
         ALERTS,
+        type Alert,
         type AlertVariant,
     } from "@/lib/TwitchAlertVariants.ts";
     import confetti from "canvas-confetti";
 
     const token = extractTokenFromHead();
-
+    const slabsSocketToken = extractSocketTokenFromHead();
     const authProvider = createAuthProvider({ token });
-
     const apiClient = createApiClient({ authProvider });
     const pubSubClient = createPubSubClient({ authProvider });
+    const slabsSocket = createStreamLabsSocket({ token: slabsSocketToken });
 
-    const TIME_BETWEEN_ALERTS = 5000;
-
-    const AlertsQueue: Alert[] = [];
-
-    const $alertContainer = document.getElementById("alert-container");
+    const TIME_BETWEEN_ALERTS = 2000;
+    let isProcessingQueue = false;
+    const alertQueue: Alert[] = [];
+    const $alertContainer = document.getElementById(
+        "alert-container",
+    ) as HTMLDivElement;
     const $alertMessage = document.querySelector(
         ".alert__text__message",
     ) as HTMLParagraphElement;
 
     const addAlert = (
-        type: string,
+        type: Alert["type"],
         variables: Record<string, string | number>,
     ) => {
         const alert = ALERTS[type];
@@ -54,123 +57,135 @@ import "@speed-highlight/core/themes/dark.css";
             return;
         }
 
-        AlertsQueue.push({
-            type: type as Alert["type"],
-            variants: alert.variants,
-            variables: variables,
-        });
-
-        if (AlertsQueue.length === 1) {
-            processAlertQueue();
-        }
+        alertQueue.push({ type, variants: alert.variants, variables });
+        if (!isProcessingQueue) processAlertQueue();
     };
 
-    const processAlertQueue = async () => {
-        const alert = AlertsQueue.shift();
-        if (!alert) return;
-
+    async function processAlert(alert: Alert): Promise<number> {
         const { type, variants, variables } = alert;
-
-        const applicableVariants = variants.filter((variant) => {
-            if (type === "cheer" && variant.minBits) {
-                return variant.minBits <= (variables?.bits ?? 0);
-            }
-            return true;
-        });
-
-        const variant: AlertVariant | null = applicableVariants.reduce(
-            (highest: AlertVariant | null, current: AlertVariant) => {
-                if (
-                    !highest ||
-                    (current.minBits ?? 0) > (highest.minBits ?? 0)
-                ) {
-                    return current;
-                }
-                return highest;
-            },
+        const applicableVariants = variants.filter(
+            (variant) =>
+                type !== "cheer" || variant.minBits <= (variables?.bits ?? 0),
+        );
+        const variant = applicableVariants.reduce(
+            (highest: AlertVariant | null, current: AlertVariant) =>
+                !highest || (current.minBits ?? 0) > (highest.minBits ?? 0)
+                    ? current
+                    : highest,
             null,
         );
 
         if (!variant) {
             console.error("No variant found for alert", alert);
-            return;
+            return 0;
         }
 
-        const replaceVariables = (template: string) => {
-            if (!variables) return template;
-            return Object.entries(variables).reduce(
-                (str: string, [key, value]) => {
-                    // Si key es message, poner dentro de un párrafo
-                    if (key === "message") {
-                        return str.replace(
-                            new RegExp(`\\$${key}`, "g"),
-                            `<p>${value.toString()}</p>`,
-                        );
-                    }
-                    return str.replace(
-                        new RegExp(`\\$${key}`, "g"),
-                        value.toString(),
-                    );
-                },
-                template,
-            );
-        };
-
-        const $alertMessage = document.querySelector(
-            ".alert__text__message",
-        ) as HTMLParagraphElement;
+        const replaceVariables = (template: string) =>
+            !variables
+                ? template
+                : Object.entries(variables).reduce(
+                      (str, [key, value]) =>
+                          str.replace(
+                              new RegExp(`\\$${key}`, "g"),
+                              key === "message"
+                                  ? `<p>${value}</p>`
+                                  : value.toString(),
+                          ),
+                      template,
+                  );
 
         if (variant.audioSrc) {
             const audio = new Audio(variant.audioSrc);
             audio.volume = variant.volume ?? 1;
+            audio.onended = () => {
+                if (variant.enableTTS && variables?.message) {
+                    sleep(1000).then(() =>
+                        playWithStreamElements(variables.message as string),
+                    );
+                }
+            };
             audio.play();
         }
 
-        if (variant.messageTemplate) {
-            $alertMessage.innerHTML = replaceVariables(variant.messageTemplate);
-            $alertMessage.classList.remove("hidden");
-        } else {
-            $alertMessage.classList.add("hidden");
-        }
+        $alertMessage.innerHTML = variant.messageTemplate
+            ? replaceVariables(variant.messageTemplate)
+            : "";
+        $alertMessage.classList.toggle("hidden", !variant.messageTemplate);
+        await highlightAll({ hideLineNumbers: false });
 
-        await highlightAll({
-            hideLineNumbers: false,
+        $alertContainer.classList.remove("hidden", "animate-fade-out-down");
+        $alertContainer.classList.add("animate-fade-in-up");
+
+        if (variant.effect === "confetti") confetti({ particleCount: 100 });
+
+        const duration = variant.duration ?? 5000;
+
+        return new Promise<number>((resolve) => {
+            setTimeout(() => {
+                $alertContainer.classList.replace(
+                    "animate-fade-in-up",
+                    "animate-fade-out-down",
+                );
+                setTimeout(() => {
+                    $alertContainer.classList.add("hidden");
+                    resolve(duration);
+                }, duration);
+            }, duration);
         });
+    }
 
-        const $alertContainer = document.getElementById("alert-container");
-        $alertContainer?.classList.remove("hidden");
-        $alertContainer?.classList.add("animate-fade-in-up");
+    const sleep = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
 
-        if (variant.effect === "confetti") {
-            confetti({
-                particleCount: 100,
-            });
+    async function processAlertQueue() {
+        if (isProcessingQueue) return;
+
+        isProcessingQueue = true;
+
+        while (alertQueue.length) {
+            const alert = alertQueue.shift();
+            if (!alert) continue;
+
+            await processAlert(alert);
         }
 
-        setTimeout(() => {
-            $alertContainer?.classList.remove("animate-fade-in-up");
-            $alertContainer?.classList.add("animate-fade-out-down");
-        }, variant.duration ?? 5000);
+        isProcessingQueue = false;
+    }
 
-        setTimeout(
-            () => {
-                $alertContainer?.classList.add("hidden");
-                $alertContainer?.classList.remove("animate-fade-out-down");
-                processAlertQueue();
-            },
-            (variant.duration ?? 5000) + TIME_BETWEEN_ALERTS,
+    addAlert("cheer", {
+        username: "username",
+        bits: 222,
+        message: "Holaaaa, estos son 222 bits de prueba",
+    });
+
+    const playWithStreamElements = (text: string) => {
+        const audio = new Audio(
+            `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
         );
+        audio.volume = 0.5;
+        audio.play();
     };
 
-    // Simulación inicial de un evento de cheer
-    const simulateCheer = () => {
-        addAlert("cheer", {
-            username: "username",
-            bits: 222,
-            message: "Holaaaa, estos son 222 bits de prueba",
-        });
-    };
+    slabsSocket.on("connect", () => console.log("Connected to StreamLabs"));
+    slabsSocket.on("event", (event: any) => {
+        console.log("Event received", event);
+        switch (event.type) {
+            case "follow":
+                addAlert("follow", { username: event.message[0].from });
+                break;
+            case "bits":
+                addAlert("cheer", {
+                    username: event.message[0].from,
+                    bits: event.message[0].amount,
+                    message: event.message[0].message,
+                });
+                break;
+            default:
+                console.warn(
+                    `[StreamLabs] Event type ${event.type} not handled`,
+                );
+        }
+    });
 
-    // Llama a la función para simular un cheer
-    simulateCheer();
+    slabsSocket.connect();
 </script>

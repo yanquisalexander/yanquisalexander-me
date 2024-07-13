@@ -1,5 +1,5 @@
 ---
-import { TWITCH_TOKEN } from "@/lib/Twitch";
+import { TWITCH_TOKEN, SOCKET_TOKEN } from "@/lib/Twitch";
 import "@fontsource-variable/jost";
 import "@fontsource/cascadia-code";
 ---
@@ -10,7 +10,9 @@ import "@fontsource/cascadia-code";
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Twitch</title>
-    </head><div class="hidden" data-token={TWITCH_TOKEN}></div>
+    </head>
+    <div class="hidden" data-token={TWITCH_TOKEN}></div>
+    <div class="hidden" data-socket-token={SOCKET_TOKEN}></div>
 
     <body>
         <slot />

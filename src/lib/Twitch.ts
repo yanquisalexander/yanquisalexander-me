@@ -1,10 +1,12 @@
 import { StaticAuthProvider } from '@twurple/auth';
 import { PubSubClient } from '@twurple/pubsub';
 import { ApiClient } from '@twurple/api';
+import io from 'socket.io-client'
 
 export const CLIENT_ID = 'kjw6mxxa22q1wppo5qglufq2yidhcn'
 export const BROADCASTER_ID = '589751969'
 export const TWITCH_TOKEN = import.meta.env['TWITCH_TOKEN']
+export const SOCKET_TOKEN = import.meta.env['SLABS_SOCKET_TOKEN']
 
 export interface Command {
     command: string,
@@ -24,6 +26,12 @@ export const createPubSubClient = ({ authProvider }: { authProvider: StaticAuthP
 
 export const createApiClient = ({ authProvider }: { authProvider: StaticAuthProvider }) => {
     return new ApiClient({ authProvider });
+}
+
+export const createStreamLabsSocket = ({ token }: { token: string }) => {
+    return io(`https://sockets.streamlabs.com?token=${token}`, {
+        transports: ['websocket']
+    });
 }
 
 export const loadBadges = async ({ apiClient, broadcasterId }: { apiClient: ApiClient, broadcasterId: string }) => {
@@ -81,6 +89,18 @@ export const extractTokenFromHead = () => {
 
     if (!token) {
         throw new Error("Twitch token not found");
+    }
+
+    return token;
+}
+
+export const extractSocketTokenFromHead = () => {
+    const token = document
+        .querySelector("[data-socket-token]")
+        ?.getAttribute("data-socket-token");
+
+    if (!token) {
+        throw new Error("Socket token not found");
     }
 
     return token;

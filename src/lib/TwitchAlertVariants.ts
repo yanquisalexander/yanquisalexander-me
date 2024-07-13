@@ -20,6 +20,8 @@ export interface AlertVariant {
     duration?: number;
     probability?: Range<0, 1>;
     effect?: "confetti" | "none";
+    enableTTS?: boolean;
+    ttsVolume?: number;
 }
 
 export interface Alert {
@@ -36,9 +38,10 @@ export const ALERTS: Record<string, Alert> = {
                 minBits: 1,
                 messageTemplate: `newCheering("$username", $bits)\n.then(() => "$message")`,
                 titleTemplate: "Gracias $username",
-                duration: 900000,
+                duration: 8000,
                 effect: "confetti",
                 audioSrc: "https://www.myinstants.com/media/sounds/twitch-bits-donation-sound-effect-sfx.mp3",
+                enableTTS: true,
             },
            
         ],
@@ -49,8 +52,7 @@ export const ALERTS: Record<string, Alert> = {
                 image: "/twitch-assets/follow.gif",
                 messageTemplate: `newFollower("$username")\n.then(() => "Bienvenido a la familia 💜"`,
                 titleTemplate: "$username se ha unido",
-                duration: 900000,
-                effect: "confetti",
+                duration: 8000,
                 audioSrc: "https://www.myinstants.com/media/sounds/twitch-follower-alert-sound-effect.mp3",
             },
         ],
