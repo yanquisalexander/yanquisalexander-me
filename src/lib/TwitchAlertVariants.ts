@@ -36,7 +36,7 @@ export const ALERTS: Record<string, Alert> = {
             {
                 image: "/twitch-assets/bits.gif",
                 minBits: 1,
-                messageTemplate: `newCheering("$username", $bits)\n.then(() => "$message")`,
+                messageTemplate: `newCheering("$username", $bits)\n.then(() => \`$message\`)`,
                 titleTemplate: "Gracias $username",
                 duration: 8000,
                 effect: "confetti",

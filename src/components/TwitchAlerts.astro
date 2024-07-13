@@ -2,11 +2,14 @@
 import "@speed-highlight/core/themes/dark.css";
 ---
 
-<div id="twitch-alerts" class="fixed inset-0 flex items-center">
-    <div class="text-white h-screen w-full hidden" id="alert-container">
+<div
+    id="twitch-alerts"
+    class="fixed inset-0 flex justify-end min-h-screen items-end"
+>
+    <div class="text-white w-full hidden" id="alert-container">
         <div class="alert__text">
             <code
-                class="shj-lang-js alert__text__message hidden !py-4 !px-4 !font-cascadia break-words whitespace-pre-wrap"
+                class="shj-lang-js rounded-md !text-xl alert__text__message hidden !py-4 !px-4 !font-cascadia break-words whitespace-pre-wrap"
             ></code>
         </div>
     </div>
@@ -80,19 +83,33 @@ import "@speed-highlight/core/themes/dark.css";
             return 0;
         }
 
-        const replaceVariables = (template: string) =>
-            !variables
+        const replaceVariables = (template: string) => {
+            const CHARACTERS_PER_LINE = 50;
+
+            // Función para dividir el texto en líneas cada CHARACTERS_PER_LINE caracteres
+            const insertLineBreaks = (text: string) => {
+                let result = "";
+                // Si no necesitamos dividir el texto, lo devolvemos tal cual
+                if (text.length <= CHARACTERS_PER_LINE) return text;
+                for (let i = 0; i < text.length; i += CHARACTERS_PER_LINE) {
+                    result += text.slice(i, i + CHARACTERS_PER_LINE) + "\n";
+                }
+                return result;
+            };
+
+            return !variables
                 ? template
                 : Object.entries(variables).reduce(
                       (str, [key, value]) =>
                           str.replace(
                               new RegExp(`\\$${key}`, "g"),
                               key === "message"
-                                  ? `<p>${value}</p>`
+                                  ? insertLineBreaks(value.toString())
                                   : value.toString(),
                           ),
                       template,
                   );
+        };
 
         if (variant.audioSrc) {
             const audio = new Audio(variant.audioSrc);
@@ -107,16 +124,18 @@ import "@speed-highlight/core/themes/dark.css";
             audio.play();
         }
 
-        $alertMessage.innerHTML = variant.messageTemplate
-            ? replaceVariables(variant.messageTemplate)
-            : "";
+        $alertMessage.innerHTML = replaceVariables(
+            variant.messageTemplate ?? "",
+        );
+
         $alertMessage.classList.toggle("hidden", !variant.messageTemplate);
         await highlightAll({ hideLineNumbers: false });
 
         $alertContainer.classList.remove("hidden", "animate-fade-out-down");
         $alertContainer.classList.add("animate-fade-in-up");
 
-        if (variant.effect === "confetti") confetti({ particleCount: 100 });
+        if (variant.effect === "confetti")
+            confetti({ particleCount: 100, spread: 70, origin: { y: 1 } });
 
         const duration = variant.duration ?? 5000;
 
