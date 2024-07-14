@@ -118,6 +118,8 @@ import "@speed-highlight/core/themes/dark.css";
                 }
             };
             audio.play();
+        } else if (variant.enableTTS && variables?.message) {
+            playWithStreamElements(variables.message as string);
         }
 
         $alertMessage.innerHTML = replaceVariables(
@@ -148,10 +150,14 @@ import "@speed-highlight/core/themes/dark.css";
     }
 
     const skipAlert = () => {
-        if (isProcessingQueue) {
-            alertQueue.splice(0, alertQueue.length);
-            isProcessingQueue = false;
-        }
+        // Hide the alert
+        $alertContainer.classList.remove("animate-fade-in-up");
+        $alertContainer.classList.add("animate-fade-out-down");
+        // Wait for the animation to finish
+        sleep(500).then(() => {
+            $alertContainer.classList.add("hidden");
+        });
+        currentAlert = null;
     };
 
     async function processAlertQueue() {
@@ -197,7 +203,7 @@ import "@speed-highlight/core/themes/dark.css";
             case "donation":
                 addAlert("donation", {
                     username: event.message[0].from,
-                    amount: event.message[0].amount,
+                    amount: Number(event.message[0].amount).toFixed(2),
                     message: event.message[0].message,
                 });
                 break;
