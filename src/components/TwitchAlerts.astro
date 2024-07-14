@@ -198,7 +198,7 @@ import "@speed-highlight/core/themes/dark.css";
                 break;
             case "bits":
                 addAlert("cheer", {
-                    username: event.message[0].from,
+                    username: event.message[0].from_display_name,
                     bits: event.message[0].amount,
                     message: event.message[0].message,
                 });
