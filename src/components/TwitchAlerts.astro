@@ -6,7 +6,7 @@ import "@speed-highlight/core/themes/dark.css";
     id="twitch-alerts"
     class="fixed inset-0 flex justify-end min-h-screen items-end"
 >
-    <div class="text-white w-full hidden" id="alert-container">
+    <div class="w-full hidden" id="alert-container">
         <div class="alert__text">
             <code
                 class="shj-lang-js rounded-md !text-xl alert__text__message hidden !py-4 !px-4 !font-cascadia break-words whitespace-pre-wrap"
@@ -18,13 +18,8 @@ import "@speed-highlight/core/themes/dark.css";
 <script>
     import { highlightAll } from "@speed-highlight/core";
     import {
-        extractTokenFromHead,
         extractSocketTokenFromHead,
-        createApiClient,
-        createPubSubClient,
-        createAuthProvider,
         createStreamLabsSocket,
-        BROADCASTER_ID,
     } from "@/lib/Twitch";
     import {
         ALERTS,
@@ -33,14 +28,10 @@ import "@speed-highlight/core/themes/dark.css";
     } from "@/lib/TwitchAlertVariants.ts";
     import confetti from "canvas-confetti";
 
-    const token = extractTokenFromHead();
     const slabsSocketToken = extractSocketTokenFromHead();
-    const authProvider = createAuthProvider({ token });
-    const apiClient = createApiClient({ authProvider });
-    const pubSubClient = createPubSubClient({ authProvider });
     const slabsSocket = createStreamLabsSocket({ token: slabsSocketToken });
 
-    const TIME_BETWEEN_ALERTS = 2000;
+    const TIME_BETWEEN_ALERTS = 5000;
     let isProcessingQueue = false;
     const alertQueue: Alert[] = [];
     const $alertContainer = document.getElementById(
@@ -49,6 +40,9 @@ import "@speed-highlight/core/themes/dark.css";
     const $alertMessage = document.querySelector(
         ".alert__text__message",
     ) as HTMLParagraphElement;
+
+    const sleep = (ms: number) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
 
     const addAlert = (
         type: Alert["type"],
@@ -68,7 +62,9 @@ import "@speed-highlight/core/themes/dark.css";
         const { type, variants, variables } = alert;
         const applicableVariants = variants.filter(
             (variant) =>
-                type !== "cheer" || variant.minBits <= (variables?.bits ?? 0),
+                type !== "cheer" ||
+                (variant.minBits as number) <=
+                    ((variables?.bits as number) ?? 0),
         );
         const variant = applicableVariants.reduce(
             (highest: AlertVariant | null, current: AlertVariant) =>
@@ -89,7 +85,6 @@ import "@speed-highlight/core/themes/dark.css";
             // Función para dividir el texto en líneas cada CHARACTERS_PER_LINE caracteres
             const insertLineBreaks = (text: string) => {
                 let result = "";
-                // Si no necesitamos dividir el texto, lo devolvemos tal cual
                 if (text.length <= CHARACTERS_PER_LINE) return text;
                 for (let i = 0; i < text.length; i += CHARACTERS_PER_LINE) {
                     result += text.slice(i, i + CHARACTERS_PER_LINE) + "\n";
@@ -129,8 +124,9 @@ import "@speed-highlight/core/themes/dark.css";
         );
 
         $alertMessage.classList.toggle("hidden", !variant.messageTemplate);
-        await highlightAll({ hideLineNumbers: false });
+        await highlightAll({ hideLineNumbers: false }); // Highlight code blocks
 
+        /* Mostrar alerta */
         $alertContainer.classList.remove("hidden", "animate-fade-out-down");
         $alertContainer.classList.add("animate-fade-in-up");
 
@@ -141,6 +137,7 @@ import "@speed-highlight/core/themes/dark.css";
 
         return new Promise<number>((resolve) => {
             setTimeout(() => {
+                /* Ocultar alerta */
                 $alertContainer.classList.replace(
                     "animate-fade-in-up",
                     "animate-fade-out-down",
@@ -152,9 +149,6 @@ import "@speed-highlight/core/themes/dark.css";
             }, duration);
         });
     }
-
-    const sleep = (ms: number) =>
-        new Promise((resolve) => setTimeout(resolve, ms));
 
     async function processAlertQueue() {
         if (isProcessingQueue) return;
@@ -172,9 +166,9 @@ import "@speed-highlight/core/themes/dark.css";
     }
 
     addAlert("cheer", {
-        username: "username",
-        bits: 222,
-        message: "Holaaaa, estos son 222 bits de prueba",
+        username: "Alexitoo_UY",
+        bits: 500,
+        message: "This is a test bit alert",
     });
 
     const playWithStreamElements = (text: string) => {
@@ -205,6 +199,4 @@ import "@speed-highlight/core/themes/dark.css";
                 );
         }
     });
-
-    slabsSocket.connect();
 </script>
