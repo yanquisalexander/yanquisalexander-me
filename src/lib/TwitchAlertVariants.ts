@@ -25,7 +25,7 @@ export interface AlertVariant {
 }
 
 export interface Alert {
-    type: "cheer" | "follow" | "sub";
+    type: "follow" | "sub" | "raid" | "host" | "cheer" | "donation";
     variants: AlertVariant[];
     variables?: Record<string, string | number>;
 }
