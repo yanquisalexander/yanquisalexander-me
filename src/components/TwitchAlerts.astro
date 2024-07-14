@@ -33,6 +33,7 @@ import "@speed-highlight/core/themes/dark.css";
 
     const TIME_BETWEEN_ALERTS = 5000;
     let isProcessingQueue = false;
+    let currentAlert: Alert | null = null;
     const alertQueue: Alert[] = [];
     const $alertContainer = document.getElementById(
         "alert-container",
@@ -58,17 +59,7 @@ import "@speed-highlight/core/themes/dark.css";
         if (!isProcessingQueue) processAlertQueue();
     };
 
-    const skipAlert = () => {
-        $alertContainer.classList.replace(
-            "animate-fade-in-up",
-            "animate-fade-out-down",
-        );
-        setTimeout(() => {
-            $alertContainer.classList.add("hidden");
-        }, 500);
-    };
-
-    async function processAlert(alert: Alert): Promise<number> {
+    async function showAlert(alert: Alert) {
         const { type, variants, variables } = alert;
         const applicableVariants = variants.filter(
             (variant) =>
@@ -145,33 +136,33 @@ import "@speed-highlight/core/themes/dark.css";
 
         const duration = variant.duration ?? 5000;
 
-        return new Promise<number>((resolve) => {
-            setTimeout(() => {
-                /* Ocultar alerta */
-                $alertContainer.classList.replace(
-                    "animate-fade-in-up",
-                    "animate-fade-out-down",
-                );
-                setTimeout(() => {
-                    $alertContainer.classList.add("hidden");
-                    resolve(duration);
-                }, duration);
-            }, duration);
-        });
+        await sleep(duration);
+
+        /* Ocultar alerta */
+        $alertContainer.classList.remove("animate-fade-in-up");
+        $alertContainer.classList.add("animate-fade-out-down");
+
+        await sleep(500);
+
+        $alertContainer.classList.add("hidden");
     }
 
-    async function processAlertQueue() {
-        if (isProcessingQueue) return;
-
-        isProcessingQueue = true;
-
-        while (alertQueue.length) {
-            const alert = alertQueue.shift();
-            if (!alert) continue;
-
-            await processAlert(alert);
+    const skipAlert = () => {
+        if (isProcessingQueue) {
+            alertQueue.splice(0, alertQueue.length);
+            isProcessingQueue = false;
         }
+    };
 
+    async function processAlertQueue() {
+        isProcessingQueue = true;
+        while (alertQueue.length > 0) {
+            currentAlert = alertQueue.shift() ?? null;
+            if (currentAlert) {
+                await showAlert(currentAlert);
+                await sleep(TIME_BETWEEN_ALERTS);
+            }
+        }
         isProcessingQueue = false;
     }
 
