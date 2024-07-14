@@ -50,9 +50,18 @@ import "@speed-highlight/core/themes/dark.css";
         type: Alert["type"],
         variables: Record<string, string | number>,
     ) => {
+        if (type === "host") {
+            /* Host are not more available in Twitch, so treat them as raids */
+            type = "raid";
+        }
         const alert = ALERTS[type];
         if (!alert) {
             console.error(`Alert type ${type} not defined in ALERTS`);
+            return;
+        }
+
+        if (!alert.variants) {
+            console.error(`Alert type ${type} has no variants`);
             return;
         }
 

@@ -82,6 +82,14 @@ export const ALERTS: Record<string, Partial<Alert>> = {
             },
         ],
     },
-
-    // Agrega otros tipos como "follow" o "sub" según sea necesario
+    raid: {
+        variants: [
+            {
+                messageTemplate: `newRaid("$username", $raiders)\n.then(() => \`¡$username acaba de traer a $raiders espectadores! 💜\`)`,
+                duration: 8000,
+                audioSrc: '/twitch-assets/raid.mp3',
+                volume: 1,
+            },
+        ],
+    },
 };

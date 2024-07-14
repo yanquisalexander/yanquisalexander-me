@@ -7,6 +7,8 @@ interface EventMessage {
     streak_months?: number;
     months?: number;
     sub_type?: string;
+    raiders?: number;
+    viewers?: number;
 }
 
 interface StreamLabsEvent {
@@ -14,7 +16,7 @@ interface StreamLabsEvent {
     message: EventMessage[];
 }
 
-const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription"];
+const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription", "raid", "host"];
 
 export function handleStreamLabsEvent({ event, addAlert, skipAlert }: { event: StreamLabsEvent, addAlert: Function, skipAlert: Function }) {
     console.log("Event received", event);
@@ -62,6 +64,9 @@ export function handleStreamLabsEvent({ event, addAlert, skipAlert }: { event: S
                 addAlert("sub", { username });
             }
             break;
+        case "raid":
+        case "host":
+            addAlert(type, { username, raiders: msg.raiders ?? msg.viewers ?? 0 });
         default:
             console.warn(`[StreamLabs] Event type ${type} not handled`);
     }
