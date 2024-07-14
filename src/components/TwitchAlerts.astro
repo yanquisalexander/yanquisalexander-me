@@ -100,8 +100,8 @@ import "@speed-highlight/core/themes/dark.css";
                           str.replace(
                               new RegExp(`\\$${key}`, "g"),
                               key === "message"
-                                  ? insertLineBreaks(value.toString())
-                                  : value.toString(),
+                                  ? insertLineBreaks(value.toString() ?? "")
+                                  : value?.toString(),
                           ),
                       template,
                   );
@@ -206,6 +206,32 @@ import "@speed-highlight/core/themes/dark.css";
                     amount: Number(event.message[0].amount).toFixed(2),
                     message: event.message[0].message,
                 });
+                break;
+            case "subscription":
+                if (
+                    event.message[0].streak_months > 1 ||
+                    event.message[0].sub_type === "resub"
+                ) {
+                    addAlert("resub", {
+                        username: event.message[0].from,
+                        months:
+                            event.message[0].streak_months ??
+                            event.message[0].months ??
+                            1,
+                        message: (() => {
+                            const message = event.message[0].message;
+                            if (message && message.length > 0) {
+                                return message as string;
+                            }
+                            return "¡Gracias por seguir apoyando el canal! 💜";
+                        })(),
+                    });
+                    return;
+                } else {
+                    addAlert("sub", {
+                        username: event.message[0].from,
+                    });
+                }
                 break;
             default:
                 console.warn(

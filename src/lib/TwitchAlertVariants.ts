@@ -23,7 +23,7 @@ export interface AlertVariant {
 }
 
 export interface Alert {
-    type: "follow" | "sub" | "raid" | "host" | "cheer" | "donation";
+    type: "follow" | "sub" | "raid" | "host" | "cheer" | "donation" | "resub";
     variants: AlertVariant[];
     variables?: Record<string, string | number>;
 }
@@ -47,6 +47,8 @@ export const ALERTS: Record<string, Partial<Alert>> = {
             {
                 messageTemplate: `newFollower("$username")\n.then(() => "Bienvenido a la familia 💜"`,
                 duration: 8000,
+                audioSrc: '/twitch-assets/alerta-nuevo-seguidor.mp3',
+                volume: 0.25,
             },
         ],
     },
@@ -57,6 +59,26 @@ export const ALERTS: Record<string, Partial<Alert>> = {
                 duration: 15000,
                // audioSrc: "https://www.myinstants.com/media/sounds/twitch-donation-sound-effect.mp3",
                 enableTTS: true,
+            },
+        ],
+    },
+    sub: {
+        variants: [
+            {
+                messageTemplate: `newSubscriber("$username")\n.then(() => \`¡Se acaba de unir a la familia! 💜\`)`,
+                duration: 8000,
+                audioSrc: '/twitch-assets/nuevo-sub.mp3',
+                volume: 1,
+            },
+        ],
+    },
+    resub: {
+        variants: [
+            {
+                messageTemplate: `newResub("$username", $months)\n.then(() => \`$message\`)`,
+                duration: 8000,
+                audioSrc: '/twitch-assets/resub.mp3',
+                volume: 1,
             },
         ],
     },
