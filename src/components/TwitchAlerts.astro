@@ -58,6 +58,16 @@ import "@speed-highlight/core/themes/dark.css";
         if (!isProcessingQueue) processAlertQueue();
     };
 
+    const skipAlert = () => {
+        $alertContainer.classList.replace(
+            "animate-fade-in-up",
+            "animate-fade-out-down",
+        );
+        setTimeout(() => {
+            $alertContainer.classList.add("hidden");
+        }, 500);
+    };
+
     async function processAlert(alert: Alert): Promise<number> {
         const { type, variants, variables } = alert;
         const applicableVariants = variants.filter(
@@ -192,6 +202,9 @@ import "@speed-highlight/core/themes/dark.css";
                     bits: event.message[0].amount,
                     message: event.message[0].message,
                 });
+                break;
+            case "skipAlert":
+                skipAlert();
                 break;
             default:
                 console.warn(
