@@ -185,7 +185,7 @@ import "@speed-highlight/core/themes/dark.css";
         console.log("Event received", event);
         switch (event.type) {
             case "follow":
-                addAlert("follow", { username: event.message[0].from });
+                addAlert("follow", { username: event.message[0].name });
                 break;
             case "bits":
                 addAlert("cheer", {
