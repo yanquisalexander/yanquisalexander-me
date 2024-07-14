@@ -21,14 +21,16 @@ export default defineConfig({
       enabled: true
     }
   }),
-  plugins: [
-    dynamicImport({
-      filter(id) {
-        if (id.includes("@speed-highlight/core"))
-          return true;
-      }
-    })
-  ],
+  vite: {
+    plugins: [
+      dynamicImport({
+        filter(id) {
+          if (id.includes("@speed-highlight/core"))
+            return true;
+        }
+      })
+    ],
+  },
   markdown: {
     shikiConfig: {
       theme: 'synthwave-84',
