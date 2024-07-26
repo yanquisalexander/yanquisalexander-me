@@ -144,14 +144,14 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         }
 
         // Replace the !speak text with an image (Keep the rest intact because later we will parse emotes)
-        if (message.startsWith("!speak")) {
+        /* if (message.startsWith("!speak")) {
             const $horn = document.createElement("img");
             $horn.src =
                 "https://cdn-icons-png.flaticon.com/512/1711/1711789.png";
             $horn.classList.add("message-emote");
 
             message = message.replace("!speak", $horn.outerHTML);
-        }
+        } */
 
         let messageContent = message;
 
@@ -309,7 +309,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
         }),
     );
 
-    commands.push(
+    /* commands.push(
         createCommand({
             command: "speak",
             execute: (text) => {
@@ -317,7 +317,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
                 ttsQueue.push({ message });
             },
         }),
-    );
+    ); */
 
     const speak = (text: string, lang = "es-UY") => {
         // If the queue is empty, speak the message

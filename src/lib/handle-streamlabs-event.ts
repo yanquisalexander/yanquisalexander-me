@@ -1,3 +1,5 @@
+import type { getStreamLabsConfig } from "./Streamlabs";
+
 // handleStreamLabsEvent.ts
 interface EventMessage {
     name?: string;
@@ -11,14 +13,18 @@ interface EventMessage {
     viewers?: number;
 }
 
+const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription", "raid", "host", 'pauseQueue', 'unpauseQueue'] as const;
+
+
 interface StreamLabsEvent {
-    type: string;
+    type: typeof SUPPORTED_EVENTS[number];
     message: EventMessage[];
 }
 
-const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription", "raid", "host"];
 
-export function handleStreamLabsEvent({ event, addAlert, skipAlert }: { event: StreamLabsEvent, addAlert: Function, skipAlert: Function }) {
+// getStreamLabsConfig returns a promise, but we can't use async/await in the function signature
+
+export function handleStreamLabsEvent({ event, addAlert, skipAlert, config, processAlertQueue }: { event: StreamLabsEvent, addAlert: Function, skipAlert: Function, config: Awaited<ReturnType<typeof getStreamLabsConfig>>, processAlertQueue: Function }) {
     console.log("Event received", event);
 
     if (!SUPPORTED_EVENTS.includes(event.type)) {
@@ -27,8 +33,8 @@ export function handleStreamLabsEvent({ event, addAlert, skipAlert }: { event: S
     }
 
     const { type, message } = event;
-    const msg = message[0];
-    const username = msg.name ?? msg.from;
+    const msg = message[0] ?? {};
+    const username = msg.name ?? msg.from ?? "Anónimo";
 
     switch (type) {
         case "follow":
@@ -67,6 +73,13 @@ export function handleStreamLabsEvent({ event, addAlert, skipAlert }: { event: S
         case "raid":
         case "host":
             addAlert(type, { username, raiders: msg.raiders ?? msg.viewers ?? 0 });
+        case "pauseQueue":
+            config.pausedQueue = true;
+            break;
+        case "unpauseQueue":
+            config.pausedQueue = false;
+            processAlertQueue();
+            break;
         default:
             console.warn(`[StreamLabs] Event type ${type} not handled`);
     }

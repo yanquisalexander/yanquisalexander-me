@@ -28,9 +28,11 @@ import "@speed-highlight/core/themes/dark.css";
     } from "@/lib/TwitchAlertVariants.ts";
     import confetti from "canvas-confetti";
     import { handleStreamLabsEvent } from "@/lib/handle-streamlabs-event";
+    import { getStreamLabsConfig } from "@/lib/Streamlabs";
 
     const slabsSocketToken = extractSocketTokenFromHead();
     const slabsSocket = createStreamLabsSocket({ token: slabsSocketToken });
+    const SLABS_WIDGET_CONFIG = await getStreamLabsConfig();
 
     const TIME_BETWEEN_ALERTS = 5000;
     let isProcessingQueue = false;
@@ -127,7 +129,7 @@ import "@speed-highlight/core/themes/dark.css";
                     );
                 }
             };
-            audio.play();
+            if (!SLABS_WIDGET_CONFIG.muted) audio.play();
         } else if (variant.enableTTS && variables?.message) {
             playWithStreamElements(variables.message as string);
         }
@@ -171,8 +173,10 @@ import "@speed-highlight/core/themes/dark.css";
     };
 
     async function processAlertQueue() {
+        if (SLABS_WIDGET_CONFIG.pausedQueue) return;
         isProcessingQueue = true;
         while (alertQueue.length > 0) {
+            if (SLABS_WIDGET_CONFIG.pausedQueue) break;
             currentAlert = alertQueue.shift() ?? null;
             if (currentAlert) {
                 await showAlert(currentAlert);
@@ -187,11 +191,17 @@ import "@speed-highlight/core/themes/dark.css";
             `https://api.streamelements.com/kappa/v2/speech?voice=Enrique&text=${text}`,
         );
         audio.volume = 0.5;
-        audio.play();
+        if (!SLABS_WIDGET_CONFIG.muted) audio.play();
     };
 
     slabsSocket.on("connect", () => console.log("Connected to StreamLabs"));
     slabsSocket.on("event", (event: any) => {
-        handleStreamLabsEvent({ event, addAlert, skipAlert });
+        handleStreamLabsEvent({
+            event,
+            addAlert,
+            skipAlert,
+            config: SLABS_WIDGET_CONFIG,
+            processAlertQueue,
+        });
     });
 </script>

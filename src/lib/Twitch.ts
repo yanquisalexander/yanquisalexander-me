@@ -7,6 +7,7 @@ export const CLIENT_ID = 'kjw6mxxa22q1wppo5qglufq2yidhcn'
 export const BROADCASTER_ID = '589751969'
 export const TWITCH_TOKEN = import.meta.env['TWITCH_TOKEN']
 export const SOCKET_TOKEN = import.meta.env['SLABS_SOCKET_TOKEN']
+export const SLABS_API_TOKEN = import.meta.env['SLABS_API_TOKEN']
 
 export interface Command {
     command: string,
