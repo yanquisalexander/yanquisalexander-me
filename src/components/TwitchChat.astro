@@ -20,7 +20,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
     <template id="chatlist_item">
         <div
             data-message-id
-            class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-1 w-full"
+            class="px-2 py-2 animate-fade-in-right animate-duration-250 mb-1 w-full bg-[#181818] rounded-md"
         >
             <span class="meta" style="color: {color}">
                 <span class="badges inline-block"> </span>
@@ -138,7 +138,7 @@ import TwitchLayout from "@/layouts/TwitchLayout.astro";
             $badge.classList.add("chat-badge");
             $badge.src = badge.versions
                 .find((v) => v.id === value)
-                ?.getImageUrl(1) as string;
+                ?.getImageUrl(2) as string;
 
             $badges?.appendChild($badge);
         }
