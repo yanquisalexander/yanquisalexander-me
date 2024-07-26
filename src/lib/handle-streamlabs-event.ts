@@ -11,9 +11,10 @@ interface EventMessage {
     sub_type?: string;
     raiders?: number;
     viewers?: number;
+    user_message?: string;
 }
 
-const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription", "raid", "host", 'pauseQueue', 'unpauseQueue'] as const;
+const SUPPORTED_EVENTS = ["follow", "bits", "skipAlert", "reload.instant", "donation", "subscription", "raid", "host", 'pauseQueue', 'unpauseQueue', 'custom'] as const;
 
 
 interface StreamLabsEvent {
@@ -80,6 +81,16 @@ export function handleStreamLabsEvent({ event, addAlert, skipAlert, config, proc
             config.pausedQueue = false;
             processAlertQueue();
             break;
+        case "custom":
+            // message = *Alexitoo_UY* canjeó *Mensaje*
+
+            // Extract the username from message
+
+            addAlert("speakCommand", {
+                username: msg.message?.split("*")[1],
+                message: msg.user_message
+            });
+            break
         default:
             console.warn(`[StreamLabs] Event type ${type} not handled`);
     }

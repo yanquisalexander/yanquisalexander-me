@@ -23,7 +23,7 @@ export interface AlertVariant {
 }
 
 export interface Alert {
-    type: "follow" | "sub" | "raid" | "host" | "cheer" | "donation" | "resub";
+    type: "follow" | "sub" | "raid" | "host" | "cheer" | "donation" | "resub" | "speakCommand";
     variants: AlertVariant[];
     variables?: Record<string, string | number>;
 }
@@ -39,7 +39,7 @@ export const ALERTS: Record<string, Partial<Alert>> = {
                 audioSrc: "https://www.myinstants.com/media/sounds/twitch-bits-donation-sound-effect-sfx.mp3",
                 enableTTS: true,
             },
-           
+
         ],
     },
     follow: {
@@ -57,7 +57,7 @@ export const ALERTS: Record<string, Partial<Alert>> = {
             {
                 messageTemplate: `newDonation("$username", $amount)\n.then(() => \`$message\`)`,
                 duration: 15000,
-               // audioSrc: "https://www.myinstants.com/media/sounds/twitch-donation-sound-effect.mp3",
+                // audioSrc: "https://www.myinstants.com/media/sounds/twitch-donation-sound-effect.mp3",
                 enableTTS: true,
             },
         ],
@@ -89,6 +89,16 @@ export const ALERTS: Record<string, Partial<Alert>> = {
                 duration: 8000,
                 audioSrc: '/twitch-assets/raid.mp3',
                 volume: 1,
+            },
+        ],
+    },
+    speakCommand: {
+        variants: [
+            {
+                messageTemplate: `speak("$username", \`$message\`)`,
+                duration: 16000,
+                enableTTS: true,
+                ttsVolume: 1,
             },
         ],
     },
